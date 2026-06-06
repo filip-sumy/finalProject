@@ -1,0 +1,40 @@
+<h2>Clients</h2>
+
+<a th:href="@{/clients/create}">
+    Add Client
+</a>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+    </tr>
+
+    <tr th:each="client : ${clients}">
+
+        <td th:text="${client.id}"></td>
+        <td th:text="${client.firstName}"></td>
+        <td th:text="${client.lastName}"></td>
+        <td th:text="${client.email}"></td>
+
+        <td>
+
+            <a th:href="@{/clients/edit/{id}(id=${client.id})}">
+                Edit
+            </a>
+
+            |
+
+            <a th:href="@{/clients/delete/{id}(id=${client.id})}">
+                Delete
+            </a>
+
+        </td>
+
+    </tr>
+
+</table>

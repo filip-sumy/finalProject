@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Orders</title>
+</head>
+<body>
+
+<h2>Orders</h2>
+
+<a th:href="@{/orders/create}">
+    Create Order
+</a>
+
+<br><br>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>Client ID</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+    <tr th:each="order : ${orders}">
+
+        <td th:text="${order.id}"></td>
+
+        <td th:text="${order.clientId}"></td>
+
+        <td th:text="${order.status}"></td>
+
+        <td>
+
+            <form th:action="@{/orders/approve/{id}(id=${order.id})}"
+                  method="post"
+                  style="display:inline;">
+
+                <button type="submit">
+                    Approve
+                </button>
+
+            </form>
+
+            <a th:href="@{/orders/delete/{id}(id=${order.id})}">
+                Delete
+            </a>
+
+        </td>
+
+    </tr>
+
+</table>
+
+</body>
+</html>

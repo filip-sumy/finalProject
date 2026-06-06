@@ -1,0 +1,30 @@
+<form th:action="${editMode}
+      ? @{/clients/edit/{id}(id=${client.id})}
+      : @{/clients/create}"
+      th:object="${client}"
+      method="post">
+
+    <input th:field="*{firstName}"
+           placeholder="First Name"/>
+
+    <input th:field="*{lastName}"
+           placeholder="Last Name"/>
+
+    <input th:field="*{email}"
+           placeholder="Email"/>
+
+    <input type="password"
+           th:field="*{password}"
+           placeholder="Password"/>
+
+    <input th:field="*{phone}"
+           placeholder="Phone"/>
+
+    <input th:field="*{address}"
+           placeholder="Address"/>
+
+    <button type="submit">
+        Save
+    </button>
+
+</form>
