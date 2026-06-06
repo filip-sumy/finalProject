@@ -1,30 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(${editMode} ? #{client.edit} : #{client.add})}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<h2 th:text="${editMode} ? #{client.edit} : #{client.add}">Client Form</h2>
+
 <form th:action="${editMode}
       ? @{/clients/edit/{id}(id=${client.id})}
       : @{/clients/create}"
       th:object="${client}"
       method="post">
 
-    <input th:field="*{firstName}"
-           placeholder="First Name"/>
+    <div>
+        <label th:text="#{employee.firstname}">First Name</label>
+        <input th:field="*{firstName}"/>
+        <span class="error-field" th:if="${#fields.hasErrors('firstName')}"
+              th:errors="*{firstName}"></span>
+    </div>
 
-    <input th:field="*{lastName}"
-           placeholder="Last Name"/>
+    <div>
+        <label th:text="#{employee.lastname}">Last Name</label>
+        <input th:field="*{lastName}"/>
+        <span class="error-field" th:if="${#fields.hasErrors('lastName')}"
+              th:errors="*{lastName}"></span>
+    </div>
 
-    <input th:field="*{email}"
-           placeholder="Email"/>
+    <div>
+        <label th:text="#{employee.email}">Email</label>
+        <input th:field="*{email}"/>
+        <span class="error-field" th:if="${#fields.hasErrors('email')}"
+              th:errors="*{email}"></span>
+    </div>
 
-    <input type="password"
-           th:field="*{password}"
-           placeholder="Password"/>
+    <div>
+        <label th:text="#{employee.password}">Password</label>
+        <input type="password" th:field="*{password}"/>
+        <small th:if="${editMode}" th:text="#{employee.password.hint}"></small>
+        <span class="error-field" th:if="${#fields.hasErrors('password')}"
+              th:errors="*{password}"></span>
+    </div>
 
-    <input th:field="*{phone}"
-           placeholder="Phone"/>
+    <div>
+        <label th:text="#{client.phone}">Phone</label>
+        <input th:field="*{phone}"/>
+    </div>
 
-    <input th:field="*{address}"
-           placeholder="Address"/>
+    <div>
+        <label th:text="#{client.address}">Address</label>
+        <input th:field="*{address}"/>
+    </div>
 
-    <button type="submit">
-        Save
-    </button>
-
+    <br/>
+    <button type="submit" th:text="#{action.save}">Save</button>
 </form>
+
+<br/>
+<a th:href="@{/clients}" th:text="#{action.back}">Back</a>
+
+</body>
+</html>

@@ -1,23 +1,33 @@
 package org.spring.finalproject.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.spring.finalproject.dto.request.ManufacturerDto;
-import org.spring.finalproject.dto.request.OrderDto;
-import org.spring.finalproject.entity.Manufacturer;
+import org.spring.finalproject.dto.OrderDto;
+import org.spring.finalproject.dto.OrderRowDto;
 import org.spring.finalproject.entity.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class OrderMapper {
-    private final ModelMapper modelMapper;
 
     public OrderDto toDto(Order order) {
-        return modelMapper.map(order, OrderDto.class);
-    }
 
-    public Order toEntity(OrderDto dto) {
-        return modelMapper.map(dto, Order.class);
+        OrderDto dto = new OrderDto();
+        dto.setId(order.getId());
+        dto.setStatus(order.getStatus());
+
+        if (order.getClient() != null) {
+            dto.setClientId(order.getClient().getId());
+        }
+
+        dto.setRows(order.getRows().stream()
+                .map(row -> {
+                    OrderRowDto rowDto = new OrderRowDto();
+                    rowDto.setApplianceId(
+                            row.getAppliance().getId());
+                    rowDto.setQuantity(row.getQuantity());
+                    return rowDto;
+                })
+                .toList());
+
+        return dto;
     }
 }

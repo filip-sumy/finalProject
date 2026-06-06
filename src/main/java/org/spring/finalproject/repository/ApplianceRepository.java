@@ -17,4 +17,6 @@ public interface ApplianceRepository extends JpaRepository<Appliance, Long> {
             String name,
             Pageable pageable
     );
+
+    long countByManufacturer_Id(Long manufacturerId);
 }

@@ -2,10 +2,11 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.request.OrderDto;
+import org.spring.finalproject.dto.OrderDto;
 import org.spring.finalproject.service.ApplianceService;
 import org.spring.finalproject.service.ClientService;
 import org.spring.finalproject.service.OrderService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,9 +24,7 @@ public class OrderController {
     @GetMapping
     public String findAll(Model model) {
 
-        model.addAttribute(
-                "orders",
-                orderService.findAll());
+        model.addAttribute("orders", orderService.findAll());
 
         return "order/list";
     }
@@ -33,39 +32,24 @@ public class OrderController {
     @GetMapping("/create")
     public String createForm(Model model) {
 
-        model.addAttribute(
-                "order",
-                new OrderDto());
-
-        model.addAttribute(
-                "clients",
-                clientService.findAll());
-
-        model.addAttribute(
-                "appliances",
-                applianceService.findAll());
+        model.addAttribute("order", new OrderDto());
+        model.addAttribute("clients", clientService.findAll());
+        model.addAttribute("appliances", applianceService.findAll());
+        model.addAttribute("editMode", false);
 
         return "order/form";
     }
 
     @PostMapping("/create")
     public String create(
-            @Valid
-            @ModelAttribute("order")
-            OrderDto orderDto,
+            @Valid @ModelAttribute("order") OrderDto orderDto,
             BindingResult result,
             Model model) {
 
         if (result.hasErrors()) {
-
-            model.addAttribute(
-                    "clients",
-                    clientService.findAll());
-
-            model.addAttribute(
-                    "appliances",
-                    applianceService.findAll());
-
+            model.addAttribute("clients", clientService.findAll());
+            model.addAttribute("appliances", applianceService.findAll());
+            model.addAttribute("editMode", false);
             return "order/form";
         }
 
@@ -74,9 +58,40 @@ public class OrderController {
         return "redirect:/orders";
     }
 
+    @GetMapping("/edit/{id}")
+    public String editForm(
+            @PathVariable Long id,
+            Model model) {
+
+        model.addAttribute("order", orderService.findById(id));
+        model.addAttribute("clients", clientService.findAll());
+        model.addAttribute("appliances", applianceService.findAll());
+        model.addAttribute("editMode", true);
+
+        return "order/form";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String update(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("order") OrderDto orderDto,
+            BindingResult result,
+            Model model) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("clients", clientService.findAll());
+            model.addAttribute("appliances", applianceService.findAll());
+            model.addAttribute("editMode", true);
+            return "order/form";
+        }
+
+        orderService.update(id, orderDto);
+
+        return "redirect:/orders";
+    }
+
     @GetMapping("/delete/{id}")
-    public String delete(
-            @PathVariable Long id) {
+    public String delete(@PathVariable Long id) {
 
         orderService.delete(id);
 
@@ -84,8 +99,8 @@ public class OrderController {
     }
 
     @PostMapping("/approve/{id}")
-    public String approve(
-            @PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public String approve(@PathVariable Long id) {
 
         orderService.approve(id);
 

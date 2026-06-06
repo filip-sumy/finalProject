@@ -1,6 +1,6 @@
 package org.spring.finalproject.service;
 
-import org.spring.finalproject.dto.request.OrderDto;
+import org.spring.finalproject.dto.OrderDto;
 
 import java.util.List;
 

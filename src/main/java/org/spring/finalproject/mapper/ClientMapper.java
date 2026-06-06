@@ -2,7 +2,7 @@ package org.spring.finalproject.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.spring.finalproject.dto.request.ClientDto;
+import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.entity.Client;
 import org.springframework.stereotype.Component;
 

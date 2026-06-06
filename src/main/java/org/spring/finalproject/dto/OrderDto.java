@@ -1,8 +1,10 @@
-package org.spring.finalproject.dto.request;
+package org.spring.finalproject.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.spring.finalproject.OrderStatus;
 
 import java.util.List;
@@ -13,10 +15,13 @@ public class OrderDto {
 
     private Long id;
 
+    @NotNull(message = "{order.client.required}")
     private Long clientId;
 
     private OrderStatus status;
 
+    @Valid
+    @NotEmpty(message = "{order.rows.required}")
     private List<OrderRowDto> rows;
 
     public OrderDto() {

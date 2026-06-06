@@ -3,8 +3,8 @@ package org.spring.finalproject.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spring.finalproject.OrderStatus;
-import org.spring.finalproject.dto.request.OrderDto;
-import org.spring.finalproject.dto.request.OrderRowDto;
+import org.spring.finalproject.dto.OrderDto;
+import org.spring.finalproject.dto.OrderRowDto;
 import org.spring.finalproject.entity.Appliance;
 import org.spring.finalproject.entity.Client;
 import org.spring.finalproject.entity.Order;
@@ -140,6 +140,13 @@ public class OrderServiceImpl implements OrderService {
                     "Approved order cannot be modified");
         }
 
+        Client client = clientRepository.findById(dto.getClientId())
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Client not found: "
+                                        + dto.getClientId()));
+
+        order.setClient(client);
         order.getRows().clear();
 
         BigDecimal totalPrice = BigDecimal.ZERO;

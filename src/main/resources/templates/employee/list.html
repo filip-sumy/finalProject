@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
+<head th:replace="~{fragments/layout :: head(#{employee.title})}"></head>
+
 <body>
 
-<h2>Employees</h2>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<a th:href="@{/employees/create}">
-    Add Employee
-</a>
+<h2 th:text="#{employee.title}">Employees</h2>
 
-<table border="1">
+<a th:href="@{/employees/create}" th:text="#{employee.add}">Add Employee</a>
 
+<table>
     <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Position</th>
-        <th>Salary</th>
-        <th>Actions</th>
+        <th th:text="#{table.id}">ID</th>
+        <th th:text="#{employee.firstname}">First Name</th>
+        <th th:text="#{employee.lastname}">Last Name</th>
+        <th th:text="#{employee.email}">Email</th>
+        <th th:text="#{employee.position}">Position</th>
+        <th th:text="#{employee.salary}">Salary</th>
+        <th th:text="#{table.actions}">Actions</th>
     </tr>
-
     <tr th:each="employee : ${employees}">
-
         <td th:text="${employee.id}"></td>
-
-        <td th:text="${employee.firstName + ' ' + employee.lastName}"></td>
-
+        <td th:text="${employee.firstName}"></td>
+        <td th:text="${employee.lastName}"></td>
         <td th:text="${employee.email}"></td>
-
         <td th:text="${employee.position}"></td>
-
         <td th:text="${employee.salary}"></td>
-
         <td>
-
-            <a th:href="@{/employees/edit/{id}(id=${employee.id})}">
-                Edit
-            </a>
-
+            <a th:href="@{/employees/edit/{id}(id=${employee.id})}"
+               th:text="#{action.edit}">Edit</a>
             |
-
-            <a th:href="@{/employees/delete/{id}(id=${employee.id})}">
-                Delete
-            </a>
-
+            <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
+               th:text="#{action.delete}">Delete</a>
         </td>
-
     </tr>
-
 </table>
+
+<div th:if="${page != null and page.totalPages > 1}">
+    <span th:text="#{pagination.page}">Page</span>
+    <span th:text="${page.number + 1}">1</span> /
+    <span th:text="${page.totalPages}">1</span>
+    <a th:if="${page.hasPrevious()}"
+       th:href="@{/employees(page=${page.number - 1},sort=${sort},direction=${direction})}"
+       th:text="#{pagination.prev}">Previous</a>
+    <a th:if="${page.hasNext()}"
+       th:href="@{/employees(page=${page.number + 1},sort=${sort},direction=${direction})}"
+       th:text="#{pagination.next}">Next</a>
+</div>
 
 </body>
 </html>

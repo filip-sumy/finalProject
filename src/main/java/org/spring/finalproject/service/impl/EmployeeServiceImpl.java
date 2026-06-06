@@ -3,12 +3,14 @@ package org.spring.finalproject.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spring.finalproject.entity.Role;
-import org.spring.finalproject.dto.request.EmployeeDto;
+import org.spring.finalproject.dto.EmployeeDto;
 import org.spring.finalproject.entity.Employee;
 import org.spring.finalproject.exception.EntityNotFoundException;
 import org.spring.finalproject.mapper.EmployeeMapper;
 import org.spring.finalproject.repository.EmployeeRepository;
 import org.spring.finalproject.service.EmployeeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,16 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .stream()
                 .map(employeeMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<EmployeeDto> findAll(Pageable pageable) {
+
+        log.debug("Fetching employees page: {}", pageable);
+
+        return employeeRepository.findAll(pageable)
+                .map(employeeMapper::toDto);
     }
 
     @Override
@@ -85,8 +97,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 && !dto.getPassword().isBlank()) {
 
             employee.setPassword(
-                    passwordEncoder.encode(
-                            dto.getPassword()));
+                    passwordEncoder.encode(dto.getPassword()));
         }
 
         log.info("Employee updated: {}", id);

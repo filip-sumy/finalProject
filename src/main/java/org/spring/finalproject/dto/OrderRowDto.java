@@ -1,5 +1,6 @@
-package org.spring.finalproject.dto.request;
+package org.spring.finalproject.dto;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,8 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderRowDto {
 
+    @NotNull(message = "{order.appliance.required}")
     private Long applianceId;
 
-    @Positive
+    @NotNull
+    @Positive(message = "{order.quantity.positive}")
     private Integer quantity;
 }

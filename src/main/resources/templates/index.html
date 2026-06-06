@@ -1,48 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<head>
-    <title>Appliance Store</title>
-</head>
+<head th:replace="~{fragments/layout :: head(#{app.title})}"></head>
 
 <body>
 
-<h1>Appliance Store</h1>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<ul>
+<h2 th:text="#{app.title}">Appliance Store</h2>
 
-    <li>
-        <a th:href="@{/employees}">
-            Employees
-        </a>
-    </li>
-
-    <li>
-        <a th:href="@{/clients}">
-            Clients
-        </a>
-    </li>
-
-    <li>
-        <a th:href="@{/manufacturers}">
-            Manufacturers
-        </a>
-    </li>
-
-    <li>
-        <a th:href="@{/appliances}">
-            Appliances
-        </a>
-    </li>
-
-    <li>
-        <a th:href="@{/orders}">
-            Orders
-        </a>
-    </li>
-
-</ul>
+<p sec:authorize="isAuthenticated()">
+    <span sec:authentication="name"></span>
+    (<span sec:authentication="principal.authorities"></span>)
+</p>
 
 </body>
-
 </html>

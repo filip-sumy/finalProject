@@ -3,11 +3,13 @@ package org.spring.finalproject.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spring.finalproject.entity.Role;
-import org.spring.finalproject.dto.request.ClientDto;
+import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.entity.Client;
+import org.spring.finalproject.exception.EntityInUseException;
 import org.spring.finalproject.exception.EntityNotFoundException;
 import org.spring.finalproject.mapper.ClientMapper;
 import org.spring.finalproject.repository.ClientRepository;
+import org.spring.finalproject.repository.OrderRepository;
 import org.spring.finalproject.service.ClientService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.List;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final OrderRepository orderRepository;
     private final ClientMapper clientMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -96,9 +99,13 @@ public class ClientServiceImpl implements ClientService {
     public void delete(Long id) {
 
         if (!clientRepository.existsById(id)) {
-
             throw new EntityNotFoundException(
                     "Client not found: " + id);
+        }
+
+        if (orderRepository.existsByClient_Id(id)) {
+            throw new EntityInUseException(
+                    "error.delete.client.in.use");
         }
 
         clientRepository.deleteById(id);

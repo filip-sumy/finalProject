@@ -1,6 +1,6 @@
 package org.spring.finalproject.service;
 
-import org.spring.finalproject.dto.request.ManufacturerDto;
+import org.spring.finalproject.dto.ManufacturerDto;
 
 import java.util.List;
 

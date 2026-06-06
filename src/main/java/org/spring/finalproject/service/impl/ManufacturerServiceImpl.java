@@ -1,10 +1,12 @@
 package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.request.ManufacturerDto;
+import org.spring.finalproject.dto.ManufacturerDto;
 import org.spring.finalproject.entity.Manufacturer;
+import org.spring.finalproject.exception.EntityInUseException;
 import org.spring.finalproject.exception.EntityNotFoundException;
 import org.spring.finalproject.mapper.ManufacturerMapper;
+import org.spring.finalproject.repository.ApplianceRepository;
 import org.spring.finalproject.repository.ManufacturerRepository;
 import org.spring.finalproject.service.ManufacturerService;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,11 @@ public class ManufacturerServiceImpl
         implements ManufacturerService {
 
     private final ManufacturerRepository repository;
+    private final ApplianceRepository applianceRepository;
     private final ManufacturerMapper mapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ManufacturerDto> findAll() {
 
         return repository.findAll()
@@ -31,6 +35,7 @@ public class ManufacturerServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ManufacturerDto findById(Long id) {
 
         Manufacturer manufacturer =
@@ -69,6 +74,16 @@ public class ManufacturerServiceImpl
 
     @Override
     public void delete(Long id) {
+
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException(
+                    "Manufacturer not found: " + id);
+        }
+
+        if (applianceRepository.countByManufacturer_Id(id) > 0) {
+            throw new EntityInUseException(
+                    "error.delete.manufacturer.in.use");
+        }
 
         repository.deleteById(id);
     }

@@ -2,7 +2,7 @@ package org.spring.finalproject.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.spring.finalproject.dto.request.EmployeeDto;
+import org.spring.finalproject.dto.EmployeeDto;
 import org.spring.finalproject.entity.Employee;
 import org.springframework.stereotype.Component;
 

@@ -1,54 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <title>Manufacturers</title>
-</head>
+<head th:replace="~{fragments/layout :: head(#{manufacturer.title})}"></head>
 
 <body>
 
-<h2>Manufacturers</h2>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<a th:href="@{/manufacturers/create}">
-    Add Manufacturer
-</a>
+<h2 th:text="#{manufacturer.title}">Manufacturers</h2>
 
-<table border="1">
+<a th:href="@{/manufacturers/create}" th:text="#{manufacturer.add}">Add Manufacturer</a>
 
+<table>
     <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Country</th>
-        <th>Actions</th>
+        <th th:text="#{table.id}">ID</th>
+        <th th:text="#{manufacturer.name}">Name</th>
+        <th th:text="#{manufacturer.country}">Country</th>
+        <th th:text="#{table.actions}">Actions</th>
     </tr>
-
     <tr th:each="manufacturer : ${manufacturers}">
         <td th:text="${manufacturer.id}"></td>
         <td th:text="${manufacturer.name}"></td>
         <td th:text="${manufacturer.country}"></td>
-
         <td>
-
-            <a th:href="@{/manufacturers/edit/{id}(id=${manufacturer.id})}">
-                Edit
-            </a>
-
+            <a th:href="@{/manufacturers/edit/{id}(id=${manufacturer.id})}"
+               th:text="#{action.edit}">Edit</a>
             |
-
-            <a th:href="@{/manufacturers/delete/{id}(id=${manufacturer.id})}">
-                Delete
-            </a>
-
+            <a th:href="@{/manufacturers/delete/{id}(id=${manufacturer.id})}"
+               th:text="#{action.delete}">Delete</a>
         </td>
     </tr>
-
 </table>
-
-<br>
-
-<a th:href="@{/}">
-    Home
-</a>
 
 </body>
 </html>

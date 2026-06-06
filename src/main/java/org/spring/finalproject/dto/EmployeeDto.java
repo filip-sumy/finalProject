@@ -1,4 +1,4 @@
-package org.spring.finalproject.dto.request;
+package org.spring.finalproject.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,12 +6,15 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.spring.finalproject.validation.PasswordPolicy;
+import org.spring.finalproject.validation.UniqueEmail;
 
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@UniqueEmail
 public class EmployeeDto {
 
     private Long id;
@@ -30,6 +33,6 @@ public class EmployeeDto {
     @Positive
     private BigDecimal salary;
 
-    @NotBlank
+    @PasswordPolicy
     private String password;
 }

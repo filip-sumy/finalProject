@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <title th:text="${title}">Appliance Store</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+
+<body>
+
+<nav th:fragment="navbar">
+    <h1 th:text="#{app.title}">Appliance Store</h1>
+    <ul>
+        <li><a th:href="@{/}" th:text="#{nav.home}">Home</a></li>
+        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
+            <a th:href="@{/employees}" th:text="#{nav.employees}">Employees</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
+            <a th:href="@{/clients}" th:text="#{nav.clients}">Clients</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
+            <a th:href="@{/manufacturers}" th:text="#{nav.manufacturers}">Manufacturers</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
+            <a th:href="@{/appliances}" th:text="#{nav.appliances}">Appliances</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','CLIENT')">
+            <a th:href="@{/orders}" th:text="#{nav.orders}">Orders</a>
+        </li>
+        <li sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" th:text="#{nav.logout}">Logout</button>
+            </form>
+        </li>
+        <li sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}" th:text="#{nav.login}">Login</a>
+        </li>
+        <li>
+            <a th:href="@{''(lang='en')}" th:text="#{lang.en}">EN</a> |
+            <a th:href="@{''(lang='uk')}" th:text="#{lang.uk}">UK</a>
+        </li>
+    </ul>
+</nav>
+
+<div th:fragment="pagination(page, url)">
+    <div th:if="${page != null and page.totalPages > 1}">
+        <span th:text="#{pagination.page}">Page</span>
+        <span th:text="${page.number + 1}">1</span> /
+        <span th:text="${page.totalPages}">1</span>
+        <a th:if="${page.hasPrevious()}"
+           th:href="${url + '&page=' + (page.number - 1)}"
+           th:text="#{pagination.prev}">Previous</a>
+        <a th:if="${page.hasNext()}"
+           th:href="${url + '&page=' + (page.number + 1)}"
+           th:text="#{pagination.next}">Next</a>
+    </div>
+</div>
+
+</body>
+</html>

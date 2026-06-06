@@ -10,12 +10,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Documented
-@Constraint(validatedBy = UniqueEmailValidator.class)
-@Target({ElementType.TYPE})
+@Constraint(validatedBy = PasswordPolicyValidator.class)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UniqueEmail {
+public @interface PasswordPolicy {
 
-    String message() default "{email.unique}";
+    String message() default "{password.policy}";
 
     Class<?>[] groups() default {};
 

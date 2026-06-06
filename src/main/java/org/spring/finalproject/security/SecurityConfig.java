@@ -1,5 +1,7 @@
 package org.spring.finalproject.security;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -8,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -16,7 +19,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
+
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -24,97 +31,91 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(
-            PasswordEncoder encoder) {
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
 
-        UserDetails admin =
-                User.builder()
-                        .username("admin")
-                        .password(
-                                encoder.encode("admin123"))
-                        .roles("ADMIN")
-                        .build();
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(encoder.encode("Admin123!"))
+                .roles(SecurityConstants.ADMIN)
+                .build();
 
-        UserDetails employee =
-                User.builder()
-                        .username("employee")
-                        .password(
-                                encoder.encode("employee123"))
-                        .roles("EMPLOYEE")
-                        .build();
+        UserDetails employee = User.builder()
+                .username("employee")
+                .password(encoder.encode("Employee123!"))
+                .roles(SecurityConstants.EMPLOYEE)
+                .build();
 
-        UserDetails client =
-                User.builder()
-                        .username("client")
-                        .password(
-                                encoder.encode("client123"))
-                        .roles("CLIENT")
-                        .build();
+        UserDetails client = User.builder()
+                .username("client")
+                .password(encoder.encode("Client123!"))
+                .roles(SecurityConstants.CLIENT)
+                .build();
 
-        return new InMemoryUserDetailsManager(
-                admin,
-                employee,
-                client
-        );
+        UserDetailsService inMemory =
+                new InMemoryUserDetailsManager(admin, employee, client);
+
+        return username -> {
+            try {
+                return customUserDetailsService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException ex) {
+                log.debug("Falling back to in-memory auth for: {}", username);
+                return inMemory.loadUserByUsername(username);
+            }
+        };
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
 
         http
-
-                .csrf(csrf -> csrf.disable())
-
                 .authorizeHttpRequests(auth -> auth
-
                         .requestMatchers(
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/h2-console/**"
+                                "/h2-console/**",
+                                "/login",
+                                "/error"
                         ).permitAll()
-
-                        .requestMatchers("/")
-                        .permitAll()
-
+                        .requestMatchers("/").authenticated()
                         .requestMatchers("/employees/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers("/manufacturers/**")
                         .hasAnyRole(
-                                "ADMIN",
-                                "EMPLOYEE"
-                        )
-
-                        .requestMatchers("/appliances/**")
+                                SecurityConstants.ADMIN,
+                                SecurityConstants.EMPLOYEE)
+                        .requestMatchers("/clients/**")
                         .hasAnyRole(
-                                "ADMIN",
-                                "EMPLOYEE"
-                        )
-
+                                SecurityConstants.ADMIN,
+                                SecurityConstants.EMPLOYEE)
+                        .requestMatchers("/manufacturers/**", "/appliances/**")
+                        .hasAnyRole(
+                                SecurityConstants.ADMIN,
+                                SecurityConstants.EMPLOYEE)
                         .requestMatchers("/orders/**")
                         .hasAnyRole(
-                                "ADMIN",
-                                "EMPLOYEE",
-                                "CLIENT"
-                        )
+                                SecurityConstants.ADMIN,
+                                SecurityConstants.EMPLOYEE,
+                                SecurityConstants.CLIENT)
+                        .anyRequest().authenticated())
 
-                        .anyRequest()
-                        .authenticated()
-                )
-
-                .formLogin(form -> form.permitAll())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error")
+                        .permitAll())
 
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
-                        .permitAll()
-                );
+                        .permitAll())
 
-        http.headers(headers ->
-                headers.frameOptions(
-                        frame -> frame.disable()));
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/error?code=403"))
+
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**"))
+
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }

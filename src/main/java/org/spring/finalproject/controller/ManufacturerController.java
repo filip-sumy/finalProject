@@ -2,7 +2,7 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.request.ManufacturerDto;
+import org.spring.finalproject.dto.ManufacturerDto;
 import org.spring.finalproject.service.ManufacturerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,9 +29,8 @@ public class ManufacturerController {
     @GetMapping("/create")
     public String createForm(Model model) {
 
-        model.addAttribute(
-                "manufacturer",
-                new ManufacturerDto());
+        model.addAttribute("manufacturer", new ManufacturerDto());
+        model.addAttribute("editMode", false);
 
         return "manufacturer/form";
     }
@@ -40,9 +39,11 @@ public class ManufacturerController {
     public String create(
             @Valid @ModelAttribute("manufacturer")
             ManufacturerDto manufacturerDto,
-            BindingResult bindingResult) {
+            BindingResult bindingResult,
+            Model model) {
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("editMode", false);
             return "manufacturer/form";
         }
 
@@ -60,6 +61,8 @@ public class ManufacturerController {
                 "manufacturer",
                 manufacturerService.findById(id));
 
+        model.addAttribute("editMode", true);
+
         return "manufacturer/form";
     }
 
@@ -68,9 +71,11 @@ public class ManufacturerController {
             @PathVariable Long id,
             @Valid @ModelAttribute("manufacturer")
             ManufacturerDto manufacturerDto,
-            BindingResult bindingResult) {
+            BindingResult bindingResult,
+            Model model) {
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("editMode", true);
             return "manufacturer/form";
         }
 

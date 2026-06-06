@@ -1,69 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Create Order</title>
-</head>
+
+<head th:replace="~{fragments/layout :: head(${editMode} ? #{order.edit} : #{order.add})}"></head>
+
 <body>
 
-<h2>Create Order</h2>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<form th:action="@{/orders/create}"
+<h2 th:text="${editMode} ? #{order.edit} : #{order.add}">Order Form</h2>
+
+<form th:action="${editMode}
+      ? @{/orders/edit/{id}(id=${order.id})}
+      : @{/orders/create}"
       th:object="${order}"
       method="post">
 
-    <label>Client:</label>
+    <div>
+        <label th:text="#{order.client}">Client</label>
+        <select th:field="*{clientId}">
+            <option value="" th:text="#{action.select}">Select</option>
+            <option th:each="client : ${clients}"
+                    th:value="${client.id}"
+                    th:text="${client.firstName + ' ' + client.lastName}">
+            </option>
+        </select>
+        <span class="error-field" th:if="${#fields.hasErrors('clientId')}"
+              th:errors="*{clientId}"></span>
+    </div>
 
-    <select th:field="*{clientId}">
+    <div>
+        <label th:text="#{appliance.title}">Appliance</label>
+        <select th:field="*{rows[0].applianceId}">
+            <option value="" th:text="#{action.select}">Select</option>
+            <option th:each="appliance : ${appliances}"
+                    th:value="${appliance.id}"
+                    th:text="${appliance.name}">
+            </option>
+        </select>
+        <span class="error-field" th:if="${#fields.hasErrors('rows[0].applianceId')}"
+              th:errors="*{rows[0].applianceId}"></span>
+    </div>
 
-        <option value="">
-            Select Client
-        </option>
+    <div>
+        <label th:text="#{appliance.quantity}">Quantity</label>
+        <input type="number" min="1" th:field="*{rows[0].quantity}"/>
+        <span class="error-field" th:if="${#fields.hasErrors('rows[0].quantity')}"
+              th:errors="*{rows[0].quantity}"></span>
+    </div>
 
-        <option th:each="client : ${clients}"
-                th:value="${client.id}"
-                th:text="${client.firstName + ' ' + client.lastName}">
-        </option>
-
-    </select>
-
-    <br><br>
-
-    <label>Appliance:</label>
-
-    <select th:field="*{rows[0].applianceId}">
-
-        <option value="">
-            Select Appliance
-        </option>
-
-        <option th:each="appliance : ${appliances}"
-                th:value="${appliance.id}"
-                th:text="${appliance.name}">
-        </option>
-
-    </select>
-
-    <br><br>
-
-    <label>Quantity:</label>
-
-    <input type="number"
-           min="1"
-           th:field="*{rows[0].quantity}"/>
-
-    <br><br>
-
-    <button type="submit">
-        Save
-    </button>
-
+    <br/>
+    <button type="submit" th:text="#{action.save}">Save</button>
 </form>
 
-<br>
-
-<a th:href="@{/orders}">
-    Back
-</a>
+<br/>
+<a th:href="@{/orders}" th:text="#{action.back}">Back</a>
 
 </body>
 </html>

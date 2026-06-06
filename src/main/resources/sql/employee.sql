@@ -11,7 +11,7 @@ VALUES
         'Admin',
         'Admin',
         'admin@test.com',
-        '$2a$10$7EqJtq98hPqEX7fNZaFWoOHiE7A5D5j0D4Hh4lVxJ5lA6iWz9yM5K',
+        '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
         'ROLE_ADMIN'
     );
 
@@ -39,7 +39,7 @@ VALUES
         'Employee',
         'Employee',
         'employee@test.com',
-        '$2a$10$7EqJtq98hPqEX7fNZaFWoOHiE7A5D5j0D4Hh4lVxJ5lA6iWz9yM5K',
+        '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
         'ROLE_EMPLOYEE'
     );
 

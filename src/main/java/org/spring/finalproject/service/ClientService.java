@@ -1,6 +1,6 @@
 package org.spring.finalproject.service;
 
-import org.spring.finalproject.dto.request.ClientDto;
+import org.spring.finalproject.dto.ClientDto;
 
 import java.util.List;
 

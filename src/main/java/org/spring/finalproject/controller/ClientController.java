@@ -2,7 +2,7 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.request.ClientDto;
+import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.service.ClientService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +19,7 @@ public class ClientController {
     @GetMapping
     public String findAll(Model model) {
 
-        model.addAttribute(
-                "clients",
-                clientService.findAll());
+        model.addAttribute("clients", clientService.findAll());
 
         return "client/list";
     }
@@ -29,10 +27,7 @@ public class ClientController {
     @GetMapping("/create")
     public String createForm(Model model) {
 
-        model.addAttribute(
-                "client",
-                new ClientDto());
-
+        model.addAttribute("client", new ClientDto());
         model.addAttribute("editMode", false);
 
         return "client/form";
@@ -40,11 +35,17 @@ public class ClientController {
 
     @PostMapping("/create")
     public String create(
-            @Valid @ModelAttribute("client")
-            ClientDto dto,
-            BindingResult bindingResult) {
+            @Valid @ModelAttribute("client") ClientDto dto,
+            BindingResult bindingResult,
+            Model model) {
+
+        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+            bindingResult.rejectValue(
+                    "password", "password.required");
+        }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("editMode", false);
             return "client/form";
         }
 
@@ -58,10 +59,10 @@ public class ClientController {
             @PathVariable Long id,
             Model model) {
 
-        model.addAttribute(
-                "client",
-                clientService.findById(id));
+        ClientDto dto = clientService.findById(id);
+        dto.setPassword(null);
 
+        model.addAttribute("client", dto);
         model.addAttribute("editMode", true);
 
         return "client/form";
@@ -70,11 +71,14 @@ public class ClientController {
     @PostMapping("/edit/{id}")
     public String update(
             @PathVariable Long id,
-            @Valid @ModelAttribute("client")
-            ClientDto dto,
-            BindingResult bindingResult) {
+            @Valid @ModelAttribute("client") ClientDto dto,
+            BindingResult bindingResult,
+            Model model) {
+
+        dto.setId(id);
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("editMode", true);
             return "client/form";
         }
 
@@ -84,8 +88,7 @@ public class ClientController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(
-            @PathVariable Long id) {
+    public String delete(@PathVariable Long id) {
 
         clientService.delete(id);
 

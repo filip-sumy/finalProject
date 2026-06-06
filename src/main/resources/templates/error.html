@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(#{error.title})}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<h2 th:text="#{error.title}">Error</h2>
+
+<div class="alert alert-error">
+    <strong th:text="${errorCode}">500</strong>:
+    <span th:text="${errorMessage}">Message</span>
+</div>
+
+<a th:href="@{/}" th:text="#{error.back}">Back to Home</a>
+
+</body>
+</html>
