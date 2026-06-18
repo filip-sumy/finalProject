@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.spring.finalproject.OrderStatus;
+import org.spring.finalproject.entity.OrderStatus;
 import org.spring.finalproject.dto.OrderDto;
 import org.spring.finalproject.dto.OrderRowDto;
 import org.spring.finalproject.entity.Appliance;

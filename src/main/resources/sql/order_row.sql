@@ -14,3 +14,6 @@ VALUES
         2,
         15000
     );
+
+ALTER TABLE order_rows
+    ALTER COLUMN id RESTART WITH 2;

@@ -43,7 +43,7 @@ public class ApplianceController {
         model.addAttribute("search", search);
         model.addAttribute("sort", sort);
         model.addAttribute("direction", direction);
-
+        model.addAttribute("size", size);
         return "appliance/list";
     }
 

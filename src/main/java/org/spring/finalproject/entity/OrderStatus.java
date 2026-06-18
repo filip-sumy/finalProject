@@ -1,4 +1,4 @@
-package org.spring.finalproject;
+package org.spring.finalproject.entity;
 
 public enum OrderStatus {
 

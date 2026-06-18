@@ -14,7 +14,7 @@
     <h1 th:text="#{app.title}">Appliance Store</h1>
     <ul>
         <li><a th:href="@{/}" th:text="#{nav.home}">Home</a></li>
-        <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
+        <li sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/employees}" th:text="#{nav.employees}">Employees</a>
         </li>
         <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">

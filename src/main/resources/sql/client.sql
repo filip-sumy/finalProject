@@ -25,3 +25,6 @@ VALUES
         '+380501112233',
         'Kyiv'
     );
+
+ALTER TABLE users
+    ALTER COLUMN id RESTART WITH 4;

@@ -80,9 +80,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/").authenticated()
                         .requestMatchers("/employees/**")
-                        .hasAnyRole(
-                                SecurityConstants.ADMIN,
-                                SecurityConstants.EMPLOYEE)
+                        .hasRole(
+                                SecurityConstants.ADMIN)
                         .requestMatchers("/clients/**")
                         .hasAnyRole(
                                 SecurityConstants.ADMIN,

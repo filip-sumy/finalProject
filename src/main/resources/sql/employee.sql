@@ -53,3 +53,6 @@ VALUES
         'Sales Manager',
         35000
     );
+
+ALTER TABLE users
+    ALTER COLUMN id RESTART WITH 4;

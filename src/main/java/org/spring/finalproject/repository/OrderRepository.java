@@ -1,6 +1,6 @@
 package org.spring.finalproject.repository;
 
-import org.spring.finalproject.OrderStatus;
+import org.spring.finalproject.entity.OrderStatus;
 import org.spring.finalproject.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +21,7 @@ public interface OrderRepository
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
+    //Search order by email
     @Query("SELECT o FROM Order o JOIN o.client c "
             + "WHERE LOWER(c.email) LIKE LOWER(CONCAT('%', :email, '%'))")
     Page<Order> findByClientEmailContaining(

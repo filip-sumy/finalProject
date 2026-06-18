@@ -27,7 +27,7 @@ public class ApplianceMapper {
     public Appliance toEntity(ApplianceDto dto) {
 
         Appliance appliance = new Appliance();
-        appliance.setId(dto.getId());
+        //appliance.setId(dto.getId());
         appliance.setName(dto.getName());
         appliance.setModel(dto.getModel());
         appliance.setPrice(dto.getPrice());

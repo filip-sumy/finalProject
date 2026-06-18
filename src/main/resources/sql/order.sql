@@ -12,3 +12,6 @@ VALUES
         'CREATED',
         1
     );
+
+ALTER TABLE orders
+    ALTER COLUMN id RESTART WITH 2;

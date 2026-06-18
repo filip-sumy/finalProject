@@ -2,7 +2,7 @@ package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spring.finalproject.OrderStatus;
+import org.spring.finalproject.entity.OrderStatus;
 import org.spring.finalproject.dto.OrderDto;
 import org.spring.finalproject.dto.OrderRowDto;
 import org.spring.finalproject.entity.Appliance;
@@ -96,7 +96,6 @@ public class OrderServiceImpl implements OrderService {
 
             row.setQuantity(rowDto.getQuantity());
 
-            // сохраняем цену на момент заказа
             row.setPrice(appliance.getPrice());
 
             rows.add(row);
@@ -113,8 +112,6 @@ public class OrderServiceImpl implements OrderService {
 
         order.setRows(rows);
 
-        // если добавил поле totalPrice
-        // order.setTotalPrice(totalPrice);
 
         Order saved = orderRepository.save(order);
 
@@ -180,8 +177,6 @@ public class OrderServiceImpl implements OrderService {
                             )
             );
         }
-
-        // order.setTotalPrice(totalPrice);
 
         log.info("Order updated: {}", id);
 

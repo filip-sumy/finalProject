@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.spring.finalproject.OrderStatus;
+import org.spring.finalproject.entity.OrderStatus;
 
 import java.util.List;
 
