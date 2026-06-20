@@ -41,6 +41,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<OrderDto> findByClient(
+            Long clientId,
+            String search,
+            Pageable pageable) {
+
+        Page<Order> page;
+
+        if (search != null && !search.isBlank()) {
+            page = orderRepository.searchByClientId(
+                    clientId,
+                    search.trim(),
+                    pageable
+            );
+        } else {
+            page = orderRepository.findByClientId(clientId, pageable);
+        }
+
+        return page.map(orderMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<OrderDto> findAll() {
 
         log.debug("Fetching all orders");
@@ -110,6 +132,12 @@ public class OrderServiceImpl implements OrderService {
                                             "Appliance not found: "
                                                     + rowDto.getApplianceId()));
 
+            if (appliance.getQuantity() == null
+                    || appliance.getQuantity() < rowDto.getQuantity()) {
+                throw new InsufficientStockException(
+                        "Not enough stock for appliance: " + appliance.getName());
+            }
+
             OrderRow row = new OrderRow();
 
             row.setOrder(order);
@@ -144,25 +172,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto update(Long id,
-                           OrderDto dto) {
+    public OrderDto update(Long id, OrderDto dto) {
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Order not found: " + id));
+                        new EntityNotFoundException("Order not found: " + id));
 
         if (order.getStatus() == OrderStatus.APPROVED) {
-
-            throw new OrderAlreadyApprovedException(
-                    "Approved order cannot be modified");
+            throw new OrderAlreadyApprovedException("Approved order cannot be modified");
         }
 
         Client client = clientRepository.findById(dto.getClientId())
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Client not found: "
-                                        + dto.getClientId()));
+                        new EntityNotFoundException("Client not found"));
 
         order.setClient(client);
         order.getRows().clear();
@@ -171,37 +193,35 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderRowDto rowDto : dto.getRows()) {
 
-            Appliance appliance =
-                    applianceRepository.findById(
-                                    rowDto.getApplianceId())
-                            .orElseThrow(() ->
-                                    new EntityNotFoundException(
-                                            "Appliance not found"));
+            Appliance appliance = applianceRepository.findById(rowDto.getApplianceId())
+                    .orElseThrow(() ->
+                            new EntityNotFoundException("Appliance not found"));
+
+            if (appliance.getQuantity() == null
+                    || appliance.getQuantity() < rowDto.getQuantity()) {
+                throw new InsufficientStockException(
+                        "Not enough stock for appliance: " + appliance.getName());
+            }
 
             OrderRow row = new OrderRow();
-
             row.setOrder(order);
             row.setAppliance(appliance);
-
             row.setQuantity(rowDto.getQuantity());
-
             row.setPrice(appliance.getPrice());
 
             order.getRows().add(row);
 
             totalPrice = totalPrice.add(
                     appliance.getPrice()
-                            .multiply(
-                                    BigDecimal.valueOf(
-                                            rowDto.getQuantity()
-                                    )
-                            )
+                            .multiply(BigDecimal.valueOf(rowDto.getQuantity()))
             );
         }
 
+        Order saved = orderRepository.save(order); // 🔥 FIX
+
         log.info("Order updated: {}", id);
 
-        return orderMapper.toDto(order);
+        return orderMapper.toDto(saved);
     }
 
     @Override
@@ -228,33 +248,31 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Order not found"));
+                        new EntityNotFoundException("Order not found"));
 
         if (order.getStatus() == OrderStatus.APPROVED) {
-
-            throw new OrderAlreadyApprovedException(
-                    "Order already approved");
+            throw new OrderAlreadyApprovedException("Order already approved");
         }
 
         for (OrderRow row : order.getRows()) {
 
             Appliance appliance = row.getAppliance();
 
-            if (appliance.getQuantity()
-                    < row.getQuantity()) {
-
+            if (appliance.getQuantity() < row.getQuantity()) {
                 throw new InsufficientStockException(
-                        "Not enough stock for appliance: "
-                                + appliance.getName());
+                        "Not enough stock for appliance: " + appliance.getName());
             }
 
             appliance.setQuantity(
-                    appliance.getQuantity()
-                            - row.getQuantity());
+                    appliance.getQuantity() - row.getQuantity()
+            );
+
+            applianceRepository.save(appliance); // 🔥 FIX
         }
 
         order.setStatus(OrderStatus.APPROVED);
+
+        orderRepository.save(order); // 🔥 FIX
 
         log.info("Order approved: {}", id);
     }

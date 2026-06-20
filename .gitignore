@@ -1,5 +1,9 @@
 HELP.md
 target/
+
+# local debug artifacts
+cookies.txt
+edit_*.html
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

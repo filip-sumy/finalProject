@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{fragments/layout :: head(${editMode} ? #{order.edit} : #{order.add})}"></head>
 
@@ -9,11 +10,45 @@
 
 <h2 th:text="${editMode} ? #{order.edit} : #{order.add}">Order Form</h2>
 
+<p sec:authorize="hasRole('CLIENT')" class="hint">
+    <a th:href="@{/shop}" th:text="#{shop.browse}">Browse shop</a>
+    ·
+    <a th:href="@{/cart}" th:text="#{nav.cart}">Cart</a>
+</p>
+
+<h3 th:text="#{order.catalog}">Available products</h3>
+
+<table class="catalog-table">
+    <thead>
+    <tr>
+        <th th:text="#{appliance.name}">Name</th>
+        <th th:text="#{appliance.model}">Model</th>
+        <th th:text="#{appliance.price}">Price</th>
+        <th th:text="#{order.stock.available}">In stock</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="appliance : ${appliances}"
+        th:classappend="${appliance.quantity == null || appliance.quantity == 0} ? 'out-of-stock'">
+        <td th:text="${appliance.name}">Name</td>
+        <td th:text="${appliance.model}">Model</td>
+        <td th:text="${#numbers.formatDecimal(appliance.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+        <td>
+            <span th:if="${appliance.quantity != null && appliance.quantity > 0}"
+                  th:text="${appliance.quantity}">0</span>
+            <span th:if="${appliance.quantity == null || appliance.quantity == 0}"
+                  th:text="#{appliance.out.of.stock}">Out of stock</span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 <form th:action="${editMode}
       ? @{/orders/edit/{id}(id=${order.id})}
       : @{/orders/create}"
       th:object="${order}"
-      method="post">
+      method="post"
+      id="orderForm">
 
     <div sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
         <label th:text="#{order.client}">Client</label>
@@ -30,11 +65,13 @@
 
     <div>
         <label th:text="#{appliance.title}">Appliance</label>
-        <select th:field="*{rows[0].applianceId}">
+        <select id="applianceSelect" th:field="*{rows[0].applianceId}">
             <option value="" th:text="#{action.select}">Select</option>
             <option th:each="appliance : ${appliances}"
                     th:value="${appliance.id}"
-                    th:text="${appliance.name}">
+                    th:disabled="${appliance.quantity == null || appliance.quantity == 0}"
+                    th:attr="data-stock=${appliance.quantity != null ? appliance.quantity : 0}"
+                    th:text="|${appliance.name} — ${#numbers.formatDecimal(appliance.price, 1, 'COMMA', 2, 'POINT')}|">
             </option>
         </select>
         <span class="error-field" th:if="${#fields.hasErrors('rows[0].applianceId')}"
@@ -43,7 +80,8 @@
 
     <div>
         <label th:text="#{appliance.quantity}">Quantity</label>
-        <input type="number" min="1" th:field="*{rows[0].quantity}"/>
+        <input type="number" min="1" id="quantityInput" th:field="*{rows[0].quantity}"/>
+        <span id="stockHint" class="hint"></span>
         <span class="error-field" th:if="${#fields.hasErrors('rows[0].quantity')}"
               th:errors="*{rows[0].quantity}"></span>
     </div>
@@ -54,6 +92,39 @@
 
 <br/>
 <a th:href="@{/orders}" th:text="#{action.back}">Back</a>
+
+<script th:inline="javascript">
+    (function () {
+        const select = document.getElementById('applianceSelect');
+        const qty = document.getElementById('quantityInput');
+        const hint = document.getElementById('stockHint');
+        const maxLabel = /*[[#{order.stock.max}]]*/ 'Max available';
+
+        function updateStockLimit() {
+            const option = select.options[select.selectedIndex];
+            const stock = option && option.dataset.stock
+                ? parseInt(option.dataset.stock, 10)
+                : 0;
+
+            if (!option || !option.value || stock <= 0) {
+                qty.removeAttribute('max');
+                hint.textContent = '';
+                return;
+            }
+
+            qty.max = stock;
+            hint.textContent = maxLabel + ': ' + stock;
+
+            if (qty.value && parseInt(qty.value, 10) > stock) {
+                qty.value = stock;
+            }
+        }
+
+        select.addEventListener('change', updateStockLimit);
+        qty.addEventListener('input', updateStockLimit);
+        updateStockLimit();
+    })();
+</script>
 
 </body>
 </html>

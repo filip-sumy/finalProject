@@ -119,7 +119,9 @@ class OrderServiceImplTest {
 
         Appliance appliance = new Appliance();
         appliance.setId(2L);
+        appliance.setName("Fridge");
         appliance.setPrice(BigDecimal.valueOf(100));
+        appliance.setQuantity(10);
 
         OrderDto dto = new OrderDto();
         dto.setClientId(1L);

@@ -2,12 +2,12 @@ package org.spring.finalproject.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.spring.finalproject.dto.response.ClientResponseDto;
 import org.spring.finalproject.entity.OrderStatus;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -21,6 +21,8 @@ public class OrderDto {
     private Long clientId;
 
     private OrderStatus status;
+
+    private BigDecimal totalPrice;
 
     @Valid
     @NotEmpty(message = "{order.rows.required}")

@@ -26,6 +26,15 @@
         <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
             <a th:href="@{/appliances}" th:text="#{nav.appliances}">Appliances</a>
         </li>
+        <li sec:authorize="hasRole('CLIENT')">
+            <a th:href="@{/shop}" th:text="#{nav.shop}">Shop</a>
+        </li>
+        <li sec:authorize="hasRole('CLIENT')">
+            <a th:href="@{/cart}">
+                <span th:text="#{nav.cart}">Cart</span>
+                (<span th:text="${cartItemCount}">0</span>)
+            </a>
+        </li>
         <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE','CLIENT')">
             <a th:href="@{/orders}" th:text="#{nav.orders}">Orders</a>
         </li>

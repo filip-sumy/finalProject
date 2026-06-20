@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(#{shop.title})}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<h2 th:text="#{shop.title}">Shop</h2>
+
+<p class="hint">
+    <a th:href="@{/cart}" th:text="#{nav.cart}">Cart</a>
+    (<span th:text="${cartItemCount}">0</span>)
+    ·
+    <a th:href="@{/orders}" th:text="#{nav.orders}">Orders</a>
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th th:text="#{appliance.name}">Name</th>
+        <th th:text="#{appliance.model}">Model</th>
+        <th th:text="#{appliance.price}">Price</th>
+        <th th:text="#{order.stock.available}">In stock</th>
+        <th th:text="#{table.actions}">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="appliance : ${appliances}"
+        th:classappend="${appliance.quantity == null || appliance.quantity == 0} ? 'out-of-stock'">
+        <td th:text="${appliance.name}">Name</td>
+        <td th:text="${appliance.model}">Model</td>
+        <td th:text="${#numbers.formatDecimal(appliance.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+        <td>
+            <span th:if="${appliance.quantity != null && appliance.quantity > 0}"
+                  th:text="${appliance.quantity}">0</span>
+            <span th:if="${appliance.quantity == null || appliance.quantity == 0}"
+                  th:text="#{appliance.out.of.stock}">Out of stock</span>
+        </td>
+        <td>
+            <form th:if="${appliance.quantity != null && appliance.quantity > 0}"
+                  th:action="@{/cart/add}"
+                  method="post"
+                  class="inline-form">
+                <input type="hidden" name="applianceId" th:value="${appliance.id}"/>
+                <label>
+                    <span th:text="#{appliance.quantity}">Qty</span>
+                    <input type="number" name="quantity" value="1" min="1"
+                           th:max="${appliance.quantity}" required/>
+                </label>
+                <button type="submit" th:text="#{cart.add}">Add to cart</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

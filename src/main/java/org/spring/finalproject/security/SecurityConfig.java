@@ -95,6 +95,8 @@ public class SecurityConfig {
                                 SecurityConstants.ADMIN,
                                 SecurityConstants.EMPLOYEE,
                                 SecurityConstants.CLIENT)
+                        .requestMatchers("/shop/**", "/cart/**")
+                        .hasRole(SecurityConstants.CLIENT)
                         .anyRequest().authenticated())
 
                 .formLogin(form -> form

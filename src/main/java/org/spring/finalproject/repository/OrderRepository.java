@@ -16,7 +16,9 @@ import java.util.List;
 public interface OrderRepository
         extends JpaRepository<Order, Long> {
 
+    boolean existsByIdAndClient_Email(Long id, String email);
     List<Order> findByClientId(Long clientId);
+    Page<Order> findByClientId(Long clientId, Pageable pageable);
 
     List<Order> findByStatus(OrderStatus status);
 
@@ -40,6 +42,22 @@ public interface OrderRepository
        OR LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
     """)
     Page<Order> search(
+            @Param("search") String search,
+            Pageable pageable);
+
+    @Query("""
+    SELECT o
+    FROM Order o
+    JOIN o.client c
+    WHERE o.client.id = :clientId
+      AND (
+            LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
+         OR LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+         OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
+      )
+""")
+    Page<Order> searchByClientId(
+            @Param("clientId") Long clientId,
             @Param("search") String search,
             Pageable pageable);
 }
