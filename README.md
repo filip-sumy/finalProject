@@ -22,4 +22,3 @@ Pagination
 Sort
 Jwt
 
-All of theese , ecept Jwt and Controller tests
