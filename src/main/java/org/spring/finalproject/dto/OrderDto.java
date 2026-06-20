@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.spring.finalproject.dto.response.ClientResponseDto;
 import org.spring.finalproject.entity.OrderStatus;
 
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.List;
 public class OrderDto {
 
     private Long id;
+
+    private ClientResponseDto client;
 
     @NotNull(message = "{order.client.required}")
     private Long clientId;

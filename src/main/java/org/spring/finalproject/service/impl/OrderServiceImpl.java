@@ -2,6 +2,7 @@ package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.entity.OrderStatus;
 import org.spring.finalproject.dto.OrderDto;
 import org.spring.finalproject.dto.OrderRowDto;
@@ -17,6 +18,8 @@ import org.spring.finalproject.repository.ApplianceRepository;
 import org.spring.finalproject.repository.ClientRepository;
 import org.spring.finalproject.repository.OrderRepository;
 import org.spring.finalproject.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +50,25 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderMapper::toDto)
                 .toList();
     }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<OrderDto> findAll(
+            String search,
+            Pageable pageable) {
 
+        Page<Order> page;
+
+        if (search != null && !search.isBlank()) {
+            page = orderRepository.search(
+                    search.trim(),
+                    pageable
+            );
+        } else {
+            page = orderRepository.findAll(pageable);
+        }
+
+        return page.map(orderMapper::toDto);
+    }
     @Override
     @Transactional(readOnly = true)
     public OrderDto findById(Long id) {

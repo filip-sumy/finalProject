@@ -9,18 +9,123 @@
 
 <h2 th:text="#{employee.title}">Employees</h2>
 
+<!-- ================= SEARCH + SIZE ================= -->
+<form method="get" th:action="@{/employees}" class="search-form">
+
+    <input type="text"
+           name="search"
+           th:value="${search}"
+           th:placeholder="#{employee.search.placeholder}"/>
+
+    <button type="submit"
+            th:text="#{employee.search}">
+        Search
+    </button>
+
+    <label th:text="#{pagination.size}">Size:</label>
+
+    <select name="size" onchange="this.form.submit()">
+        <option value="5" th:selected="${page.size == 5}">5</option>
+        <option value="10" th:selected="${page.size == 10}">10</option>
+        <option value="20" th:selected="${page.size == 20}">20</option>
+        <option value="50" th:selected="${page.size == 50}">50</option>
+    </select>
+
+    <input type="hidden" name="sort" th:value="${sort}">
+    <input type="hidden" name="direction" th:value="${direction}">
+</form>
+
 <a th:href="@{/employees/create}" th:text="#{employee.add}">Add Employee</a>
 
+<hr/>
+
+<!-- ================= TABLE ================= -->
 <table>
+
+    <thead>
     <tr>
         <th th:text="#{table.id}">ID</th>
-        <th th:text="#{employee.firstname}">First Name</th>
-        <th th:text="#{employee.lastname}">Last Name</th>
-        <th th:text="#{employee.email}">Email</th>
-        <th th:text="#{employee.position}">Position</th>
-        <th th:text="#{employee.salary}">Salary</th>
+
+        <!-- FIRST NAME -->
+        <th>
+            <a th:href="@{/employees(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='firstName',
+                    direction=${sort == 'firstName' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{employee.firstname}">First Name</span>
+                <span th:if="${sort == 'firstName'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
+        <!-- LAST NAME -->
+        <th>
+            <a th:href="@{/employees(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='lastName',
+                    direction=${sort == 'lastName' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{employee.lastname}">Last Name</span>
+                <span th:if="${sort == 'lastName'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
+        <!-- EMAIL -->
+        <th>
+            <a th:href="@{/employees(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='email',
+                    direction=${sort == 'email' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{employee.email}">Email</span>
+                <span th:if="${sort == 'email'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
+        <!-- POSITION -->
+        <th>
+            <a th:href="@{/employees(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='position',
+                    direction=${sort == 'position' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{employee.position}">Position</span>
+                <span th:if="${sort == 'position'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
+        <!-- SALARY -->
+        <th>
+            <a th:href="@{/employees(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='salary',
+                    direction=${sort == 'salary' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{employee.salary}">Salary</span>
+                <span th:if="${sort == 'salary'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
         <th th:text="#{table.actions}">Actions</th>
     </tr>
+    </thead>
+
+    <tbody>
     <tr th:each="employee : ${employees}">
         <td th:text="${employee.id}"></td>
         <td th:text="${employee.firstName}"></td>
@@ -28,6 +133,7 @@
         <td th:text="${employee.email}"></td>
         <td th:text="${employee.position}"></td>
         <td th:text="${employee.salary}"></td>
+
         <td>
             <a th:href="@{/employees/edit/{id}(id=${employee.id})}"
                th:text="#{action.edit}">Edit</a>
@@ -36,18 +142,44 @@
                th:text="#{action.delete}">Delete</a>
         </td>
     </tr>
+    </tbody>
+
 </table>
 
-<div th:if="${page != null and page.totalPages > 1}">
-    <span th:text="#{pagination.page}">Page</span>
-    <span th:text="${page.number + 1}">1</span> /
-    <span th:text="${page.totalPages}">1</span>
+<!-- ================= PAGINATION ================= -->
+<div th:if="${page != null and page.totalPages > 1}" class="pagination">
+
     <a th:if="${page.hasPrevious()}"
-       th:href="@{/employees(page=${page.number - 1},sort=${sort},direction=${direction})}"
-       th:text="#{pagination.prev}">Previous</a>
+       th:href="@{/employees(
+            page=${page.number - 1},
+            size=${page.size},
+            search=${search},
+            sort=${sort},
+            direction=${direction}
+       )}"
+       th:text="#{pagination.prev}">
+        ← Previous
+    </a>
+
+    <span>
+        <span th:text="#{pagination.page}">Page</span>
+        <b th:text="${page.number + 1}"></b>
+        /
+        <span th:text="${page.totalPages}"></span>
+    </span>
+
     <a th:if="${page.hasNext()}"
-       th:href="@{/employees(page=${page.number + 1},sort=${sort},direction=${direction})}"
-       th:text="#{pagination.next}">Next</a>
+       th:href="@{/employees(
+            page=${page.number + 1},
+            size=${page.size},
+            search=${search},
+            sort=${sort},
+            direction=${direction}
+       )}"
+       th:text="#{pagination.next}">
+        Next →
+    </a>
+
 </div>
 
 </body>

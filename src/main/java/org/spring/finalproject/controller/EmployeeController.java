@@ -22,7 +22,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public String findAll(
+    public String findAll(@RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sort,
@@ -34,10 +34,12 @@ public class EmployeeController {
                 : Sort.by(sort).ascending();
 
         Page<EmployeeDto> result = employeeService.findAll(
+                search,
                 PageRequest.of(page, size, sortOrder));
 
         model.addAttribute("employees", result.getContent());
         model.addAttribute("page", result);
+        model.addAttribute("search", search);
         model.addAttribute("sort", sort);
         model.addAttribute("direction", direction);
 

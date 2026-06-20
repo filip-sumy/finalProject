@@ -11,6 +11,8 @@ import org.spring.finalproject.mapper.ClientMapper;
 import org.spring.finalproject.repository.ClientRepository;
 import org.spring.finalproject.repository.OrderRepository;
 import org.spring.finalproject.service.ClientService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +39,24 @@ public class ClientServiceImpl implements ClientService {
                 .map(clientMapper::toDto)
                 .toList();
     }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<ClientDto> findAll(
+            String search,
+            Pageable pageable) {
 
+        Page<Client> page;
+
+        if (search != null && !search.isBlank()) {
+            page = clientRepository
+                    .findByFirstNameContainingIgnoreCase(
+                            search.trim(), pageable);
+        } else {
+            page = clientRepository.findAll(pageable);
+        }
+
+        return page.map(clientMapper::toDto);
+    }
     @Override
     @Transactional(readOnly = true)
     public ClientDto findById(Long id) {

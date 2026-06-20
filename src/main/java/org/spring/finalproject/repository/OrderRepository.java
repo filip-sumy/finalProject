@@ -1,5 +1,6 @@
 package org.spring.finalproject.repository;
 
+import org.spring.finalproject.entity.Client;
 import org.spring.finalproject.entity.OrderStatus;
 import org.spring.finalproject.entity.Order;
 import org.springframework.data.domain.Page;
@@ -29,4 +30,16 @@ public interface OrderRepository
             Pageable pageable);
 
     boolean existsByClient_Id(Long clientId);
+
+    @Query("""
+    SELECT o
+    FROM Order o
+    JOIN o.client c
+    WHERE LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+       OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
+       OR LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
+    """)
+    Page<Order> search(
+            @Param("search") String search,
+            Pageable pageable);
 }

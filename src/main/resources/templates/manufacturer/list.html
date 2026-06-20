@@ -9,28 +9,149 @@
 
 <h2 th:text="#{manufacturer.title}">Manufacturers</h2>
 
-<a th:href="@{/manufacturers/create}" th:text="#{manufacturer.add}">Add Manufacturer</a>
+<!-- ================= SEARCH + SIZE ================= -->
+<form method="get" th:action="@{/manufacturers}" class="search-form">
 
+    <!-- SEARCH -->
+    <input type="text"
+           name="search"
+           th:value="${search}"
+           th:placeholder="#{manufacturer.search}"/>
+
+    <button type="submit"
+            th:text="#{manufacturer.search}">
+        Search
+    </button>
+
+    <!-- PAGE SIZE -->
+    <label th:text="#{pagination.size}">Size:</label>
+    <select name="size" onchange="this.form.submit()">
+        <option value="5" th:selected="${page.size == 5}">5</option>
+        <option value="10" th:selected="${page.size == 10}">10</option>
+        <option value="20" th:selected="${page.size == 20}">20</option>
+        <option value="50" th:selected="${page.size == 50}">50</option>
+    </select>
+
+    <input type="hidden" name="sort" th:value="${sort}">
+    <input type="hidden" name="direction" th:value="${direction}">
+</form>
+
+<a th:href="@{/manufacturers/create}"
+   th:text="#{manufacturer.add}">
+    Add Manufacturer
+</a>
+
+<hr/>
+
+<!-- ================= TABLE ================= -->
 <table>
+
+    <thead>
     <tr>
+
         <th th:text="#{table.id}">ID</th>
-        <th th:text="#{manufacturer.name}">Name</th>
-        <th th:text="#{manufacturer.country}">Country</th>
+
+        <!-- NAME SORT -->
+        <th>
+            <a th:href="@{/manufacturers(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='name',
+                    direction=${sort == 'name' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{manufacturer.name}">Name</span>
+
+                <span th:if="${sort == 'name'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
+        <!-- COUNTRY SORT -->
+        <th>
+            <a th:href="@{/manufacturers(
+                    page=0,
+                    size=${page.size},
+                    search=${search},
+                    sort='country',
+                    direction=${sort == 'country' and direction == 'asc' ? 'desc' : 'asc'}
+                )}">
+                <span th:text="#{manufacturer.country}">Country</span>
+
+                <span th:if="${sort == 'country'}"
+                      th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+
         <th th:text="#{table.actions}">Actions</th>
+
     </tr>
+    </thead>
+
+    <tbody>
+
     <tr th:each="manufacturer : ${manufacturers}">
+
         <td th:text="${manufacturer.id}"></td>
         <td th:text="${manufacturer.name}"></td>
         <td th:text="${manufacturer.country}"></td>
+
         <td>
             <a th:href="@{/manufacturers/edit/{id}(id=${manufacturer.id})}"
-               th:text="#{action.edit}">Edit</a>
+               th:text="#{action.edit}">
+                Edit
+            </a>
             |
             <a th:href="@{/manufacturers/delete/{id}(id=${manufacturer.id})}"
-               th:text="#{action.delete}">Delete</a>
+               th:text="#{action.delete}">
+                Delete
+            </a>
         </td>
+
     </tr>
+
+    </tbody>
+
 </table>
+
+<!-- ================= PAGINATION ================= -->
+<div th:if="${page != null and page.totalPages > 1}" class="pagination">
+
+    <!-- PREVIOUS -->
+    <a th:if="${page.hasPrevious()}"
+       th:href="@{/manufacturers(
+            page=${page.number - 1},
+            size=${page.size},
+            search=${search},
+            sort=${sort},
+            direction=${direction}
+       )}"
+       th:text="#{pagination.prev}">
+        Previous
+    </a>
+
+    <!-- PAGE INFO -->
+    <span>
+        <span th:text="#{pagination.page}">Page</span>
+        <b th:text="${page.number + 1}"></b>
+        /
+        <span th:text="${page.totalPages}"></span>
+    </span>
+
+    <!-- NEXT -->
+    <a th:if="${page.hasNext()}"
+       th:href="@{/manufacturers(
+            page=${page.number + 1},
+            size=${page.size},
+            search=${search},
+            sort=${sort},
+            direction=${direction}
+       )}"
+       th:text="#{pagination.next}">
+        Next
+    </a>
+
+</div>
 
 </body>
 </html>

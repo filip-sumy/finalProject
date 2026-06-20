@@ -2,10 +2,14 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.dto.OrderDto;
 import org.spring.finalproject.service.ApplianceService;
 import org.spring.finalproject.service.ClientService;
 import org.spring.finalproject.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,10 +26,27 @@ public class OrderController {
     private final ApplianceService applianceService;
 
     @GetMapping
-    public String findAll(Model model) {
+    public String findAll(@RequestParam(required = false) String search,
+                          @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = "10") int size,
+                          @RequestParam(defaultValue = "id") String sort,
+                          @RequestParam(defaultValue = "asc") String direction,
+                          Model model) {
 
-        model.addAttribute("orders", orderService.findAll());
+        Sort sortOrder = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sort).descending()
+                : Sort.by(sort).ascending();
 
+        Page<OrderDto> result = orderService.findAll(
+                search,
+                PageRequest.of(page, size, sortOrder));
+
+        model.addAttribute("orders", result.getContent());
+        model.addAttribute("page", result);
+        model.addAttribute("search", search);
+        model.addAttribute("sort", sort);
+        model.addAttribute("direction", direction);
+        model.addAttribute("size", size);
         return "order/list";
     }
 

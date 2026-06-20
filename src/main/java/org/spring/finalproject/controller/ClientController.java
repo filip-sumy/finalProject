@@ -2,8 +2,12 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.spring.finalproject.dto.ApplianceDto;
 import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.service.ClientService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,10 +21,26 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public String findAll(Model model) {
+    public String findAll(@RequestParam(required = false) String search,
+                          @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = "10") int size,
+                          @RequestParam(defaultValue = "id") String sort,
+                          @RequestParam(defaultValue = "asc") String direction,
+                          Model model) {
+        Sort sortOrder = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sort).descending()
+                : Sort.by(sort).ascending();
 
-        model.addAttribute("clients", clientService.findAll());
+        Page<ClientDto> result = clientService.findAll(
+                search,
+                PageRequest.of(page, size, sortOrder));
 
+        model.addAttribute("clients", result.getContent());
+        model.addAttribute("page", result);
+        model.addAttribute("search", search);
+        model.addAttribute("sort", sort);
+        model.addAttribute("direction", direction);
+        model.addAttribute("size", size);
         return "client/list";
     }
 

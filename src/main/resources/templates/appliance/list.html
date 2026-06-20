@@ -21,7 +21,7 @@
     <button type="submit" th:text="#{appliance.search}">Search</button>
 
     <!-- PAGE SIZE -->
-    <label>Size:</label>
+    <label th:text="#{table.size}">Size:</label>
     <select name="size" onchange="this.form.submit()">
         <option value="5" th:selected="${page.size == 5}">5</option>
         <option value="10" th:selected="${page.size == 10}">10</option>
@@ -55,7 +55,7 @@
                     sort='name',
                     direction=${sort == 'name' and direction == 'asc' ? 'desc' : 'asc'}
                 )}">
-                Name
+                <span th:text="#{appliance.name}">Name</span>
                 <span th:if="${sort == 'name'}"
                       th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
             </a>
@@ -70,7 +70,7 @@
                     sort='model',
                     direction=${sort == 'model' and direction == 'asc' ? 'desc' : 'asc'}
                 )}">
-                Model
+                <span th:text="#{appliance.model}">Model</span>
                 <span th:if="${sort == 'model'}"
                       th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
             </a>
@@ -85,7 +85,7 @@
                     sort='price',
                     direction=${sort == 'price' and direction == 'asc' ? 'desc' : 'asc'}
                 )}">
-                Price
+                <span th:text="#{appliance.price}">Price</span>
                 <span th:if="${sort == 'price'}"
                       th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
             </a>
@@ -100,7 +100,7 @@
                     sort='quantity',
                     direction=${sort == 'quantity' and direction == 'asc' ? 'desc' : 'asc'}
                 )}">
-                Quantity
+                <span th:text="#{appliance.quantity}">Quantity</span>
                 <span th:if="${sort == 'quantity'}"
                       th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
             </a>

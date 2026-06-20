@@ -2,6 +2,8 @@ package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spring.finalproject.dto.ClientDto;
+import org.spring.finalproject.entity.Client;
 import org.spring.finalproject.entity.Role;
 import org.spring.finalproject.dto.EmployeeDto;
 import org.spring.finalproject.entity.Employee;
@@ -38,7 +40,24 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .map(employeeMapper::toDto)
                 .toList();
     }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<EmployeeDto> findAll(
+            String search,
+            Pageable pageable) {
 
+        Page<Employee> page;
+
+        if (search != null && !search.isBlank()) {
+            page = employeeRepository
+                    .findByFirstNameContainingIgnoreCase(
+                            search.trim(), pageable);
+        } else {
+            page = employeeRepository.findAll(pageable);
+        }
+
+        return page.map(employeeMapper::toDto);
+    }
     @Override
     @Transactional(readOnly = true)
     public Page<EmployeeDto> findAll(Pageable pageable) {
