@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.dto.OrderDto;
+import org.spring.finalproject.entity.Client;
 import org.spring.finalproject.service.ApplianceService;
 import org.spring.finalproject.service.ClientService;
 import org.spring.finalproject.service.OrderService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -51,11 +53,23 @@ public class OrderController {
     }
 
     @GetMapping("/create")
-    public String createForm(Model model) {
+    public String createForm(
+            Authentication authentication,
+            Model model) {
+
+        boolean isClient = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
 
         model.addAttribute("order", new OrderDto());
-        model.addAttribute("clients", clientService.findAll());
         model.addAttribute("appliances", applianceService.findAll());
+
+        if (!isClient) {
+            model.addAttribute(
+                    "clients",
+                    clientService.findAll());
+        }
+
         model.addAttribute("editMode", false);
 
         return "order/form";
@@ -65,12 +79,36 @@ public class OrderController {
     public String create(
             @Valid @ModelAttribute("order") OrderDto orderDto,
             BindingResult result,
+            Authentication authentication,
             Model model) {
 
+        boolean isClient = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+
+        if (isClient) {
+
+            ClientDto client =
+                    clientService.findByEmail(
+                            authentication.getName());
+
+            orderDto.setClientId(client.getId());
+        }
+
         if (result.hasErrors()) {
-            model.addAttribute("clients", clientService.findAll());
-            model.addAttribute("appliances", applianceService.findAll());
+
+            model.addAttribute(
+                    "appliances",
+                    applianceService.findAll());
+
+            if (!isClient) {
+                model.addAttribute(
+                        "clients",
+                        clientService.findAll());
+            }
+
             model.addAttribute("editMode", false);
+
             return "order/form";
         }
 

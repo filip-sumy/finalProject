@@ -32,6 +32,18 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional(readOnly = true)
+    public ClientDto findByEmail(String email) {
+
+        Client client = clientRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Client not found: " + email));
+
+        return clientMapper.toDto(client);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ClientDto> findAll() {
 
         return clientRepository.findAll()

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head th:replace="~{fragments/layout :: head(${editMode} ? #{order.edit} : #{order.add})}"></head>
 
@@ -15,7 +15,7 @@
       th:object="${order}"
       method="post">
 
-    <div>
+    <div sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')">
         <label th:text="#{order.client}">Client</label>
         <select th:field="*{clientId}">
             <option value="" th:text="#{action.select}">Select</option>

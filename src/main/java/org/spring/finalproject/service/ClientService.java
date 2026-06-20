@@ -23,4 +23,6 @@ public interface ClientService {
                      ClientDto dto);
 
     void delete(Long id);
+
+    ClientDto findByEmail(String email);
 }

@@ -18,7 +18,6 @@ public class OrderDto {
 
     private ClientResponseDto client;
 
-    @NotNull(message = "{order.client.required}")
     private Long clientId;
 
     private OrderStatus status;
