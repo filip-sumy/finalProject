@@ -2,8 +2,6 @@ package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spring.finalproject.dto.ClientDto;
-import org.spring.finalproject.entity.Client;
 import org.spring.finalproject.entity.Role;
 import org.spring.finalproject.dto.EmployeeDto;
 import org.spring.finalproject.entity.Employee;
@@ -17,8 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -29,17 +25,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<EmployeeDto> findAll() {
-
-        log.debug("Fetching all employees");
-
-        return employeeRepository.findAll()
-                .stream()
-                .map(employeeMapper::toDto)
-                .toList();
-    }
     @Transactional(readOnly = true)
     @Override
     public Page<EmployeeDto> findAll(
@@ -58,15 +43,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return page.map(employeeMapper::toDto);
     }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<EmployeeDto> findAll(Pageable pageable) {
-
-        log.debug("Fetching employees page: {}", pageable);
-
-        return employeeRepository.findAll(pageable)
-                .map(employeeMapper::toDto);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -75,7 +51,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
-                                "Employee not found: " + id));
+                                "error.not.found.employee", id));
 
         return employeeMapper.toDto(employee);
     }
@@ -104,7 +80,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
-                                "Employee not found: " + id));
+                                "error.not.found.employee", id));
 
         employee.setFirstName(dto.getFirstName());
         employee.setLastName(dto.getLastName());
@@ -130,7 +106,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (!employeeRepository.existsById(id)) {
 
             throw new EntityNotFoundException(
-                    "Employee not found: " + id);
+                    "error.not.found.employee", id);
         }
 
         employeeRepository.deleteById(id);

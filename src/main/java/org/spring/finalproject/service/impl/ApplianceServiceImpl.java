@@ -1,12 +1,13 @@
 package org.spring.finalproject.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.spring.finalproject.dto.ApplianceDto;
 import org.spring.finalproject.entity.Appliance;
 import org.spring.finalproject.entity.Manufacturer;
+import org.spring.finalproject.exception.EntityInUseException;
 import org.spring.finalproject.exception.EntityNotFoundException;
 import org.spring.finalproject.mapper.ApplianceMapper;
-import org.spring.finalproject.exception.EntityInUseException;
 import org.spring.finalproject.repository.ApplianceRepository;
 import org.spring.finalproject.repository.ManufacturerRepository;
 import org.spring.finalproject.repository.OrderRowRepository;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class ApplianceServiceImpl implements ApplianceService {
 
@@ -31,7 +33,6 @@ public class ApplianceServiceImpl implements ApplianceService {
     @Override
     @Transactional(readOnly = true)
     public List<ApplianceDto> findAll() {
-
         return applianceRepository.findAll()
                 .stream()
                 .map(applianceMapper::toDto)
@@ -40,16 +41,12 @@ public class ApplianceServiceImpl implements ApplianceService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ApplianceDto> findAll(
-            String search,
-            Pageable pageable) {
-
+    public Page<ApplianceDto> findAll(String search, Pageable pageable) {
         Page<Appliance> page;
 
         if (search != null && !search.isBlank()) {
             page = applianceRepository
-                    .findByNameContainingIgnoreCase(
-                            search.trim(), pageable);
+                    .findByNameContainingIgnoreCase(search.trim(), pageable);
         } else {
             page = applianceRepository.findAll(pageable);
         }
@@ -60,52 +57,37 @@ public class ApplianceServiceImpl implements ApplianceService {
     @Override
     @Transactional(readOnly = true)
     public ApplianceDto findById(Long id) {
-
         Appliance appliance = applianceRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Appliance not found: " + id));
+                        new EntityNotFoundException("error.not.found.appliance", id));
 
         return applianceMapper.toDto(appliance);
     }
 
     @Override
     public ApplianceDto save(ApplianceDto dto) {
+        Manufacturer manufacturer = manufacturerRepository.findById(dto.getManufacturerId())
+                .orElseThrow(() ->
+                        new EntityNotFoundException("error.not.found.manufacturer"));
 
-        Manufacturer manufacturer =
-                manufacturerRepository.findById(
-                                dto.getManufacturerId())
-                        .orElseThrow(() ->
-                                new EntityNotFoundException(
-                                        "Manufacturer not found"));
-
-        Appliance appliance =
-                applianceMapper.toEntity(dto);
-
+        Appliance appliance = applianceMapper.toEntity(dto);
         appliance.setManufacturer(manufacturer);
 
-        Appliance saved =
-                applianceRepository.save(appliance);
+        Appliance saved = applianceRepository.save(appliance);
+        log.info("Appliance created: id={}, name={}", saved.getId(), saved.getName());
 
         return applianceMapper.toDto(saved);
     }
 
     @Override
-    public ApplianceDto update(Long id,
-                               ApplianceDto dto) {
+    public ApplianceDto update(Long id, ApplianceDto dto) {
+        Appliance appliance = applianceRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("error.not.found.appliance.generic"));
 
-        Appliance appliance =
-                applianceRepository.findById(id)
-                        .orElseThrow(() ->
-                                new EntityNotFoundException(
-                                        "Appliance not found"));
-
-        Manufacturer manufacturer =
-                manufacturerRepository.findById(
-                                dto.getManufacturerId())
-                        .orElseThrow(() ->
-                                new EntityNotFoundException(
-                                        "Manufacturer not found"));
+        Manufacturer manufacturer = manufacturerRepository.findById(dto.getManufacturerId())
+                .orElseThrow(() ->
+                        new EntityNotFoundException("error.not.found.manufacturer"));
 
         appliance.setName(dto.getName());
         appliance.setModel(dto.getModel());
@@ -113,22 +95,21 @@ public class ApplianceServiceImpl implements ApplianceService {
         appliance.setQuantity(dto.getQuantity());
         appliance.setManufacturer(manufacturer);
 
+        log.info("Appliance updated: id={}", id);
         return applianceMapper.toDto(appliance);
     }
 
     @Override
     public void delete(Long id) {
-
         if (!applianceRepository.existsById(id)) {
-            throw new EntityNotFoundException(
-                    "Appliance not found: " + id);
+            throw new EntityNotFoundException("error.not.found.appliance", id);
         }
 
         if (orderRowRepository.existsByAppliance_Id(id)) {
-            throw new EntityInUseException(
-                    "error.delete.appliance.in.use");
+            throw new EntityInUseException("error.delete.appliance.in.use");
         }
 
         applianceRepository.deleteById(id);
+        log.warn("Appliance deleted: id={}", id);
     }
 }

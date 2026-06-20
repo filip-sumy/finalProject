@@ -8,7 +8,9 @@
 
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<h2 th:text="#{order.title}">Orders</h2>
+<h2 th:text="${clientView} ? #{order.my.title} : #{order.title}">Orders</h2>
+
+<p th:if="${clientView}" class="hint" th:text="#{order.my.hint}">Your order history</p>
 
 <div th:if="${message}" class="alert alert-success" th:text="#{${message}}"></div>
 
@@ -37,7 +39,13 @@
     <input type="hidden" name="direction" th:value="${direction}">
 </form>
 
-<a th:href="@{/orders/create}" th:text="#{order.add}">Create Order</a>
+<a sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')"
+   th:href="@{/orders/create}"
+   th:text="#{order.add}">Create Order</a>
+
+<a sec:authorize="hasRole('CLIENT')"
+   th:href="@{/shop}"
+   th:text="#{shop.browse}">Browse shop</a>
 
 <hr/>
 

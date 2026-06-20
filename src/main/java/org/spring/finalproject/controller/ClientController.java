@@ -2,7 +2,6 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.ApplianceDto;
 import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.service.ClientService;
 import org.springframework.data.domain.Page;
@@ -107,7 +106,7 @@ public class ClientController {
         return "redirect:/clients";
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
 
         clientService.delete(id);

@@ -2,7 +2,6 @@ package org.spring.finalproject.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.spring.finalproject.dto.EmployeeDto;
 import org.spring.finalproject.dto.ManufacturerDto;
 import org.spring.finalproject.service.ManufacturerService;
 import org.springframework.data.domain.Page;
@@ -104,7 +103,7 @@ public class ManufacturerController {
         return "redirect:/manufacturers";
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String delete(
             @PathVariable Long id) {
 

@@ -1,8 +1,8 @@
 package org.spring.finalproject.exception;
 
-public class OrderAlreadyApprovedException extends RuntimeException {
+public class OrderAlreadyApprovedException extends BusinessException {
 
-    public OrderAlreadyApprovedException(String message) {
-        super(message);
+    public OrderAlreadyApprovedException(String messageKey, Object... args) {
+        super(messageKey, args);
     }
 }

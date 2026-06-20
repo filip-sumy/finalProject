@@ -102,10 +102,11 @@
                 Edit
             </a>
             |
-            <a th:href="@{/manufacturers/delete/{id}(id=${manufacturer.id})}"
-               th:text="#{action.delete}">
-                Delete
-            </a>
+            <form th:action="@{/manufacturers/delete/{id}(id=${manufacturer.id})}"
+                  method="post"
+                  style="display:inline;">
+                <button type="submit" th:text="#{action.delete}">Delete</button>
+            </form>
         </td>
 
     </tr>

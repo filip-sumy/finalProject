@@ -211,3 +211,16 @@ form.inline-form {
 form.inline-form input[type="number"] {
     width: 72px;
 }
+
+.home-panel {
+    padding: 20px 24px;
+}
+
+.home-panel ul {
+    list-style: none;
+    margin-top: 12px;
+}
+
+.home-panel li {
+    padding: 6px 0;
+}

@@ -37,7 +37,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
-                                "Client not found: " + email));
+                                "error.not.found.client", email));
 
         return clientMapper.toDto(client);
     }
@@ -76,7 +76,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
-                                "Client not found: " + id));
+                                "error.not.found.client", id));
 
         return clientMapper.toDto(client);
     }
@@ -105,7 +105,7 @@ public class ClientServiceImpl implements ClientService {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
-                                "Client not found: " + id));
+                                "error.not.found.client", id));
 
         client.setFirstName(dto.getFirstName());
         client.setLastName(dto.getLastName());
@@ -131,7 +131,7 @@ public class ClientServiceImpl implements ClientService {
 
         if (!clientRepository.existsById(id)) {
             throw new EntityNotFoundException(
-                    "Client not found: " + id);
+                    "error.not.found.client", id);
         }
 
         if (orderRepository.existsByClient_Id(id)) {

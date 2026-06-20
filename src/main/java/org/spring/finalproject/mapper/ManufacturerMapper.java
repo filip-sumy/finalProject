@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.spring.finalproject.dto.ManufacturerDto;
 import org.spring.finalproject.entity.Manufacturer;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
-@Controller
+@Component
 @RequiredArgsConstructor
 public class ManufacturerMapper {
     private final ModelMapper modelMapper;

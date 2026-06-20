@@ -11,8 +11,6 @@
 <h2 th:text="${editMode} ? #{order.edit} : #{order.add}">Order Form</h2>
 
 <p sec:authorize="hasRole('CLIENT')" class="hint">
-    <a th:href="@{/shop}" th:text="#{shop.browse}">Browse shop</a>
-    ·
     <a th:href="@{/cart}" th:text="#{nav.cart}">Cart</a>
 </p>
 

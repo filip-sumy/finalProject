@@ -3,13 +3,15 @@ package org.spring.finalproject.controller;
 import lombok.RequiredArgsConstructor;
 import org.spring.finalproject.dto.ApplianceDto;
 import org.spring.finalproject.dto.ClientDto;
+import org.spring.finalproject.exception.ExceptionMessageResolver;
 import org.spring.finalproject.exception.InsufficientStockException;
 import org.spring.finalproject.service.ApplianceService;
 import org.spring.finalproject.service.ClientService;
 import org.spring.finalproject.service.OrderService;
 import org.spring.finalproject.service.cart.Cart;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ public class CartController {
     private final ApplianceService applianceService;
     private final OrderService orderService;
     private final ClientService clientService;
+    private final ExceptionMessageResolver messageResolver;
 
     @GetMapping
     public String view(Model model) {
@@ -43,7 +46,7 @@ public class CartController {
             cart.addItem(appliance, quantity);
             redirectAttributes.addFlashAttribute("message", "cart.added");
         } catch (InsufficientStockException ex) {
-            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", messageResolver.resolve(ex));
         }
 
         return "redirect:/cart";
@@ -58,7 +61,9 @@ public class CartController {
             ApplianceDto appliance = applianceService.findById(applianceId);
             cart.updateQuantity(applianceId, quantity, appliance);
             redirectAttributes.addFlashAttribute("message", "cart.updated");
-        } catch (InsufficientStockException | IllegalArgumentException ex) {
+        } catch (InsufficientStockException ex) {
+            redirectAttributes.addFlashAttribute("error", messageResolver.resolve(ex));
+        } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
 
@@ -75,7 +80,7 @@ public class CartController {
     }
 
     @PostMapping("/checkout")
-    public String checkout(Authentication authentication,
+    public String checkout(@AuthenticationPrincipal UserDetails user,
                            RedirectAttributes redirectAttributes) {
 
         if (cart.isEmpty()) {
@@ -84,7 +89,7 @@ public class CartController {
         }
 
         try {
-            ClientDto client = clientService.findByEmail(authentication.getName());
+            ClientDto client = clientService.findByEmail(user.getUsername());
             var orderDto = cart.toOrderDto();
             orderDto.setClientId(client.getId());
             orderService.create(orderDto);
@@ -92,7 +97,7 @@ public class CartController {
             redirectAttributes.addFlashAttribute("message", "cart.checkout.success");
             return "redirect:/orders";
         } catch (InsufficientStockException ex) {
-            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", messageResolver.resolve(ex));
             return "redirect:/cart";
         }
     }

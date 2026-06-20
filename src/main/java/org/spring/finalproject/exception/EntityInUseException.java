@@ -1,15 +1,8 @@
 package org.spring.finalproject.exception;
 
-public class EntityInUseException extends RuntimeException {
+public class EntityInUseException extends BusinessException {
 
-    private final String messageKey;
-
-    public EntityInUseException(String messageKey) {
-        super(messageKey);
-        this.messageKey = messageKey;
-    }
-
-    public String getMessageKey() {
-        return messageKey;
+    public EntityInUseException(String messageKey, Object... args) {
+        super(messageKey, args);
     }
 }

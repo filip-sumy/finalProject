@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.spring.finalproject.dto.ClientDto;
 import org.spring.finalproject.dto.OrderDto;
+import org.spring.finalproject.security.SecurityUtils;
 import org.spring.finalproject.service.ApplianceService;
 import org.spring.finalproject.service.ClientService;
 import org.spring.finalproject.service.OrderService;
@@ -11,7 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,22 +33,20 @@ public class OrderController {
                           @RequestParam(defaultValue = "10") int size,
                           @RequestParam(defaultValue = "id") String sort,
                           @RequestParam(defaultValue = "asc") String direction,
-                          Authentication authentication,
+                          @AuthenticationPrincipal UserDetails user,
                           Model model) {
 
         Sort sortOrder = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sort).descending()
                 : Sort.by(sort).ascending();
 
-        boolean isClient = authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+        boolean isClient = SecurityUtils.isClient(user);
 
         Page<OrderDto> result;
 
         if (isClient) {
 
-            ClientDto client = clientService.findByEmail(authentication.getName());
+            ClientDto client = clientService.findByEmail(user.getUsername());
 
             result = orderService.findByClient(
                     client.getId(),
@@ -73,47 +73,27 @@ public class OrderController {
     }
 
     @GetMapping("/create")
-    public String createForm(Authentication authentication, Model model) {
-
-        boolean isClient = authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    public String createForm(Model model) {
 
         model.addAttribute("order", new OrderDto());
         model.addAttribute("appliances", applianceService.findAll());
-
-        if (!isClient) {
-            model.addAttribute("clients", clientService.findAll());
-        }
-
+        model.addAttribute("clients", clientService.findAll());
         model.addAttribute("editMode", false);
         return "order/form";
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public String create(@Valid @ModelAttribute("order") OrderDto orderDto,
                          BindingResult result,
-                         Authentication authentication,
                          Model model) {
 
-        boolean isClient = authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
-
-        if (isClient) {
-            ClientDto client = clientService.findByEmail(authentication.getName());
-            orderDto.setClientId(client.getId());
-        } else {
-            validateClientId(orderDto, result);
-        }
+        validateClientId(orderDto, result);
 
         if (result.hasErrors()) {
             model.addAttribute("appliances", applianceService.findAll());
-
-            if (!isClient) {
-                model.addAttribute("clients", clientService.findAll());
-            }
-
+            model.addAttribute("clients", clientService.findAll());
             model.addAttribute("editMode", false);
             return "order/form";
         }
@@ -125,12 +105,10 @@ public class OrderController {
     @GetMapping("/edit/{id}")
     @PreAuthorize("@orderSecurity.isOwner(#id, authentication) or hasAnyRole('ADMIN','EMPLOYEE')")
     public String editForm(@PathVariable Long id,
-                           Authentication authentication,
+                           @AuthenticationPrincipal UserDetails user,
                            Model model) {
 
-        boolean isClient = authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+        boolean isClient = SecurityUtils.isClient(user);
 
         model.addAttribute("order", orderService.findById(id));
         model.addAttribute("appliances", applianceService.findAll());
@@ -148,15 +126,13 @@ public class OrderController {
     public String update(@PathVariable Long id,
                          @Valid @ModelAttribute("order") OrderDto orderDto,
                          BindingResult result,
-                         Authentication authentication,
+                         @AuthenticationPrincipal UserDetails user,
                          Model model) {
 
-        boolean isClient = authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+        boolean isClient = SecurityUtils.isClient(user);
 
         if (isClient) {
-            ClientDto client = clientService.findByEmail(authentication.getName());
+            ClientDto client = clientService.findByEmail(user.getUsername());
             orderDto.setClientId(client.getId());
         } else {
             validateClientId(orderDto, result);

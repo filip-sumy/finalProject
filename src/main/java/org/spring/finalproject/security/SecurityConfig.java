@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +38,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-
         UserDetails admin = User.builder()
                 .username("admin")
                 .password(encoder.encode("Admin123!"))
@@ -45,14 +50,7 @@ public class SecurityConfig {
                 .roles(SecurityConstants.EMPLOYEE)
                 .build();
 
-        UserDetails client = User.builder()
-                .username("client")
-                .password(encoder.encode("Client123!"))
-                .roles(SecurityConstants.CLIENT)
-                .build();
-
-        UserDetailsService inMemory =
-                new InMemoryUserDetailsManager(admin, employee, client);
+        UserDetailsService inMemory = new InMemoryUserDetailsManager(admin, employee);
 
         return username -> {
             try {
@@ -65,10 +63,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http)
             throws Exception {
 
         http
+                .securityMatcher(new NegatedRequestMatcher(
+                        PathPatternRequestMatcher.withDefaults().matcher("/api/**")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/css/**",
@@ -80,8 +91,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/").authenticated()
                         .requestMatchers("/employees/**")
-                        .hasRole(
-                                SecurityConstants.ADMIN)
+                        .hasRole(SecurityConstants.ADMIN)
                         .requestMatchers("/clients/**")
                         .hasAnyRole(
                                 SecurityConstants.ADMIN,
@@ -103,14 +113,37 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .failureUrl("/login?error")
+                        .successHandler((request, response, authentication) -> {
+                            log.info("Login successful: user={}, roles={}",
+                                    authentication.getName(),
+                                    authentication.getAuthorities());
+                            response.sendRedirect("/");
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            log.warn("Login failed for user: {}",
+                                    request.getParameter("username"));
+                            response.sendRedirect("/login?error");
+                        })
                         .permitAll())
 
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if (authentication != null) {
+                                log.info("Logout: user={}", authentication.getName());
+                            }
+                            response.sendRedirect("/login?logout");
+                        })
                         .permitAll())
 
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/error?code=403"))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            log.warn("Access denied: user={}, uri={}",
+                                    request.getUserPrincipal() != null
+                                            ? request.getUserPrincipal().getName()
+                                            : "anonymous",
+                                    request.getRequestURI());
+                            response.sendRedirect("/error?code=403");
+                        }))
 
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/**"))

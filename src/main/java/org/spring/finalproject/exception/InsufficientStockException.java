@@ -1,9 +1,8 @@
 package org.spring.finalproject.exception;
 
-public class InsufficientStockException
-        extends RuntimeException {
+public class InsufficientStockException extends BusinessException {
 
-    public InsufficientStockException(String message) {
-        super(message);
+    public InsufficientStockException(String messageKey, Object... args) {
+        super(messageKey, args);
     }
 }

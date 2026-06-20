@@ -8,12 +8,27 @@
 
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<!--<h2 th:text="#{app.title}">Appliance Store</h2>-->
+<main>
+    <h2 th:text="#{home.welcome}">Welcome</h2>
 
-<!--<p sec:authorize="isAuthenticated()">-->
-<!--    <span sec:authentication="name"></span>-->
-<!--    (<span sec:authentication="principal.authorities"></span>)-->
-<!--</p>-->
+    <div sec:authorize="hasRole('CLIENT')" class="home-panel">
+        <p th:text="#{home.client.intro}">Browse products and place orders.</p>
+        <ul>
+            <li><a th:href="@{/shop}" th:text="#{nav.shop}">Shop</a> — <span th:text="#{home.client.shop}">catalog and cart</span></li>
+            <li><a th:href="@{/orders}" th:text="#{nav.orders.client}">My Orders</a> — <span th:text="#{home.client.orders}">order history and status</span></li>
+        </ul>
+    </div>
+
+    <div sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')" class="home-panel">
+        <p th:text="#{home.staff.intro}">Manage store data and process orders.</p>
+        <ul>
+            <li><a th:href="@{/orders}" th:text="#{nav.orders}">Orders</a></li>
+            <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')"><a th:href="@{/clients}" th:text="#{nav.clients}">Clients</a></li>
+            <li sec:authorize="hasAnyRole('ADMIN','EMPLOYEE')"><a th:href="@{/appliances}" th:text="#{nav.appliances}">Appliances</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/employees}" th:text="#{nav.employees}">Employees</a></li>
+        </ul>
+    </div>
+</main>
 
 </body>
 </html>

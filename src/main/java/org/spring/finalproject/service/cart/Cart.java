@@ -103,7 +103,7 @@ public class Cart implements Serializable {
         }
         if (appliance.getQuantity() == null || appliance.getQuantity() < quantity) {
             throw new InsufficientStockException(
-                    "Not enough stock for appliance: " + appliance.getName());
+                    "error.stock.insufficient", appliance.getName());
         }
     }
 }

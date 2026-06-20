@@ -138,10 +138,11 @@
 
             |
 
-            <a th:href="@{/clients/delete/{id}(id=${c.id})}"
-               th:text="#{action.delete}">
-                Delete
-            </a>
+            <form th:action="@{/clients/delete/{id}(id=${c.id})}"
+                  method="post"
+                  style="display:inline;">
+                <button type="submit" th:text="#{action.delete}">Delete</button>
+            </form>
 
         </td>
 

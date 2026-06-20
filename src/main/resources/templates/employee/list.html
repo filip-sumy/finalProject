@@ -138,8 +138,11 @@
             <a th:href="@{/employees/edit/{id}(id=${employee.id})}"
                th:text="#{action.edit}">Edit</a>
             |
-            <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
-               th:text="#{action.delete}">Delete</a>
+            <form th:action="@{/employees/delete/{id}(id=${employee.id})}"
+                  method="post"
+                  style="display:inline;">
+                <button type="submit" th:text="#{action.delete}">Delete</button>
+            </form>
         </td>
     </tr>
     </tbody>
