@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "org.spring.finalproject.controller")
 @Slf4j
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {

@@ -37,11 +37,12 @@ public class SecurityConfig {
     }
 
     /**
-     * In-memory users for quick testing when the username is not stored in the database.
-     * Usernames: {@code admin}, {@code employee} (not email addresses).
+     * Single {@link UserDetailsService} bean: database first, then in-memory fallback.
+     * In-memory usernames: {@code admin}, {@code employee} (not email addresses).
      */
     @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager(PasswordEncoder encoder) {
+    @Primary
+    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         UserDetails admin = User.builder()
                 .username("admin")
                 .password(encoder.encode("Admin123!"))
@@ -54,17 +55,10 @@ public class SecurityConfig {
                 .roles(SecurityConstants.EMPLOYEE)
                 .build();
 
-        return new InMemoryUserDetailsManager(admin, employee);
-    }
+        InMemoryUserDetailsManager inMemory =
+                new InMemoryUserDetailsManager(admin, employee);
 
-    @Bean
-    @Primary
-    public UserDetailsService userDetailsService(
-            InMemoryUserDetailsManager inMemoryUserDetailsManager) {
-
-        return new CompositeUserDetailsService(
-                customUserDetailsService,
-                inMemoryUserDetailsManager);
+        return new CompositeUserDetailsService(customUserDetailsService, inMemory);
     }
 
     @Bean

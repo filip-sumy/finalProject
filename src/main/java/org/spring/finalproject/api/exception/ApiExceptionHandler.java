@@ -11,6 +11,7 @@ import org.spring.finalproject.exception.InsufficientStockException;
 import org.spring.finalproject.exception.OrderAlreadyApprovedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -51,6 +52,17 @@ public class ApiExceptionHandler {
         return ResponseEntity
                 .status(status)
                 .body(new ApiErrorResponse(status.value(), messageResolver.resolve(ex)));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnreadableBody(
+            HttpMessageNotReadableException ex) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(new ApiErrorResponse(
+                        400,
+                        "Invalid request body. Send JSON with Content-Type: application/json"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

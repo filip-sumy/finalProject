@@ -61,6 +61,28 @@ The web UI uses form login and sessions. The API under `/api/v1/**` is stateless
 
 ### Obtain a token
 
+**Postman / REST client settings:**
+- Method: `POST`
+- URL: `http://localhost:8080/api/v1/auth/login` (one slash after host)
+- Header: `Content-Type: application/json`
+- Body → raw → JSON:
+
+```json
+{
+  "username": "employee",
+  "password": "Employee123!"
+}
+```
+
+Database user example:
+
+```json
+{
+  "username": "john@test.com",
+  "password": "password"
+}
+```
+
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
@@ -68,15 +90,6 @@ Content-Type: application/json
 {
   "username": "john@test.com",
   "password": "password"
-}
-```
-
-In-memory example:
-
-```json
-{
-  "username": "employee",
-  "password": "Employee123!"
 }
 ```
 
