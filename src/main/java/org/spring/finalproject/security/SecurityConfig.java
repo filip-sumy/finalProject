@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -14,7 +15,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -36,8 +36,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * In-memory users for quick testing when the username is not stored in the database.
+     * Usernames: {@code admin}, {@code employee} (not email addresses).
+     */
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager(PasswordEncoder encoder) {
         UserDetails admin = User.builder()
                 .username("admin")
                 .password(encoder.encode("Admin123!"))
@@ -50,16 +54,17 @@ public class SecurityConfig {
                 .roles(SecurityConstants.EMPLOYEE)
                 .build();
 
-        UserDetailsService inMemory = new InMemoryUserDetailsManager(admin, employee);
+        return new InMemoryUserDetailsManager(admin, employee);
+    }
 
-        return username -> {
-            try {
-                return customUserDetailsService.loadUserByUsername(username);
-            } catch (UsernameNotFoundException ex) {
-                log.debug("Falling back to in-memory auth for: {}", username);
-                return inMemory.loadUserByUsername(username);
-            }
-        };
+    @Bean
+    @Primary
+    public UserDetailsService userDetailsService(
+            InMemoryUserDetailsManager inMemoryUserDetailsManager) {
+
+        return new CompositeUserDetailsService(
+                customUserDetailsService,
+                inMemoryUserDetailsManager);
     }
 
     @Bean

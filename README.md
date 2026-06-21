@@ -1,62 +1,86 @@
-# Магазин бытовой техники
+# Appliance Store
 
-Веб-приложение на Spring Boot для управления магазином техники: каталог, заказы, роли сотрудников и клиентов. Есть веб-интерфейс (Thymeleaf) и REST API с JWT.
+Spring Boot application for managing an appliance store: catalog, orders, role-based access for staff and clients. Includes a Thymeleaf web UI and a stateless JWT REST API.
 
-## Быстрый старт
+## Quick start
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Откройте в браузере: http://localhost:8080
+Open http://localhost:8080
 
-Запуск тестов:
+Run tests:
 
 ```bash
 mvn test
 ```
 
-## Демо-аккаунты
+## Demo accounts
 
-| Роль | Email | Пароль |
-|------|-------|--------|
-| Администратор | admin@test.com | password |
-| Сотрудник | employee@test.com | password |
-| Клиент | john@test.com | password |
+### Database users (email login)
 
-**Резервный вход (in-memory):** если email не найден в БД — `admin` / `Admin123!` или `employee` / `Employee123!`
+| Role     | Username / email     | Password |
+|----------|----------------------|----------|
+| Admin    | `admin@test.com`     | `password` |
+| Employee | `employee@test.com`  | `password` |
+| Client   | `john@test.com`      | `password` |
 
-## Как пользоваться
+### In-memory fallback (short username login)
 
-### Клиент
-1. Войти под клиентом
-2. **Shop** — выбрать товар, добавить в корзину
-3. **Cart** — проверить позиции, оформить заказ
-4. **My Orders** — история заказов, редактирование/удаление до подтверждения
+Used when the username is **not found in the database**. These are separate accounts — not aliases for the emails above.
 
-### Сотрудник / администратор
-- CRUD: клиенты, производители, техника
-- Создание заказов от имени клиента
-- **Approve** — подтверждение заказа (списание со склада)
-- Админ дополнительно управляет сотрудниками
+| Role     | Username   | Password       |
+|----------|------------|----------------|
+| Admin    | `admin`    | `Admin123!`    |
+| Employee | `employee` | `Employee123!` |
+
+**Web login:** enter the username or email in the **Username** field on `/login`.
+
+**API login:** JSON field `username` accepts either an email or a short in-memory username.
+
+> Do not use `employee@test.com` with `Employee123!` — that email exists in the database with password `password`. In-memory credentials only work with usernames `admin` / `employee`.
+
+## User flows
+
+### Client
+1. Sign in as a client
+2. **Shop** — browse products and add items to the cart
+3. **Cart** — review items and place an order
+4. **My Orders** — order history; edit or delete orders until they are approved
+
+### Staff (employee / admin)
+- CRUD for clients, manufacturers, and appliances
+- Create orders on behalf of clients
+- **Approve** orders (deducts stock)
+- Admin additionally manages employees
 
 ## REST API (JWT)
 
-Веб-интерфейс работает через form login. API — stateless, с Bearer-токеном.
+The web UI uses form login and sessions. The API under `/api/v1/**` is stateless and uses Bearer tokens.
 
-### Получить токен
+### Obtain a token
 
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "john@test.com",
+  "username": "john@test.com",
   "password": "password"
 }
 ```
 
-Ответ:
+In-memory example:
+
+```json
+{
+  "username": "employee",
+  "password": "Employee123!"
+}
+```
+
+Response:
 
 ```json
 {
@@ -66,7 +90,7 @@ Content-Type: application/json
 }
 ```
 
-### Примеры запросов
+### Example requests
 
 ```http
 GET /api/v1/appliances
@@ -83,89 +107,94 @@ POST /api/v1/orders/{id}/approve
 Authorization: Bearer <token>
 ```
 
-Клиент видит только свои заказы. Подтверждение заказа — только ADMIN/EMPLOYEE.
+- Clients see only their own orders (list and get-by-id)
+- Order approval is restricted to `ADMIN` / `EMPLOYEE`
+- Invalid credentials return **401**; invalid JWT returns **401**
 
-## Стек
+## Tech stack
 
 - Java 17, Spring Boot 4, Spring Data JPA, Spring Security
 - Thymeleaf + i18n (English / Ukrainian)
 - H2 (dev), PostgreSQL (prod)
-- JWT (jjwt), BCrypt, ModelMapper, Lombok, AOP
+- JWT (jjwt), BCrypt, ModelMapper, Lombok, AOP logging
 
-## Профили
+## Profiles
 
-| Профиль | База данных | Назначение |
-|---------|-------------|------------|
-| `dev` (по умолчанию) | H2 in-memory | разработка, тесты |
-| `prod` | PostgreSQL | production |
+| Profile | Database        | Purpose        |
+|---------|-----------------|----------------|
+| `dev`   | H2 in-memory    | local dev, tests |
+| `prod`  | PostgreSQL      | production     |
 
-Prod:
+Production:
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
-Переменная окружения для JWT в prod: `JWT_SECRET` (base64, минимум 256 бит).
+Required environment variable in production:
 
-## Структура проекта
+- `JWT_SECRET` — Base64-encoded key (minimum 256 bits)
+
+## Project structure
 
 ```
-controller/          — MVC-контроллеры (Thymeleaf)
-api/controller/      — REST API
-api/security/        — JWT filter, JwtService, ApiSecurityConfig
-service/             — бизнес-логика
-service/cart/        — сессионная корзина
-repository/          — JPA + custom @Query
-dto/                 — модели форм и отображения
-api/dto/request|response — DTO для API
-entity/              — JPA-сущности
-mapper/              — entity ↔ DTO
-security/            — form login, RBAC, OrderSecurity
-exception/           — кастомные исключения + i18n
-resources/sql/       — начальные данные (без CommandLineRunner)
+controller/              MVC controllers (Thymeleaf)
+api/controller/          REST controllers
+api/security/            JWT filter, JwtService, ApiSecurityConfig
+service/                 Business logic
+service/cart/            Session-scoped shopping cart
+repository/              JPA repositories + custom @Query
+dto/                     Form and display models
+api/dto/request|response API DTOs
+entity/                  JPA entities
+mapper/                  Entity ↔ DTO mapping
+security/                Form login, RBAC, OrderSecurity, in-memory users
+exception/               Custom exceptions + i18n resolution
+resources/sql/           Seed data (no CommandLineRunner)
 ```
 
-## Безопасность
+## Security
 
-- **Два способа входа:** БД (email) + in-memory fallback
-- **RBAC:** ADMIN, EMPLOYEE, CLIENT
-- **URL rules** + **@PreAuthorize** + проверка владельца заказа (`OrderSecurity`)
-- **BCrypt** для паролей, политика сложности пароля
-- **CSRF** включён для веб-форм (отключён только для H2 console и API)
-- Stack traces и детали ошибок скрыты от пользователя
-- Логирование: login/logout, отказ в доступе, бизнес-события в сервисах
+- **Dual authentication:** database (email) + in-memory fallback (`admin`, `employee`)
+- **RBAC:** `ADMIN`, `EMPLOYEE`, `CLIENT`
+- **URL rules** + `@PreAuthorize` + order ownership checks (`OrderSecurity`)
+- **Separate filter chains:** JWT for `/api/**`, form login for the web UI
+- **BCrypt** password hashing and strong password policy for new users
+- **CSRF** enabled for web forms (automatic via Thymeleaf `th:action`); disabled for API
+- Stack traces and internal error details hidden from users
+- Logging: login / logout / access denied + business events in services
 
-## Языки интерфейса
+## Internationalization
 
-Переключатель EN / UK в шапке сайта (`?lang=en` / `?lang=uk`).
+Language switcher in the navbar: `?lang=en` / `?lang=uk`.
 
-Сообщения об ошибках (включая business exceptions) берутся из `messages_en.properties` и `messages_uk.properties`.
+Validation messages and business exceptions are resolved from `messages_en.properties` and `messages_uk.properties`.
 
-## Тесты
+## Tests
 
-- Unit-тесты сервисов (Mockito)
-- `@WebMvcTest` для MVC-контроллеров
-- Тесты API auth endpoint
-- Unit-тест корзины
+- Service unit tests (Mockito)
+- `@WebMvcTest` for MVC and API controllers
+- `CompositeUserDetailsServiceTest` for in-memory fallback
+- Cart unit tests
 
-## Соответствие заданию
+## Assignment checklist
 
-| Требование | Статус |
-|------------|--------|
-| Spring Data JPA + custom queries | ✅ |
-| Spring Security (in-memory + DB, RBAC, method/URL security) | ✅ |
-| DTO, SQL scripts, validation, exceptions | ✅ |
-| i18n EN + UK | ✅ |
-| Logging (AOP + business + security events) | ✅ |
-| H2 dev / PostgreSQL prod | ✅ |
-| Unit tests (services + controllers) | ✅ |
-| Order management | ✅ |
-| Search, pagination, sorting | ✅ |
-| JWT API | ✅ |
-| BCrypt | ✅ |
+| Requirement | Status |
+|-------------|--------|
+| Spring Data JPA + custom queries | Done |
+| Spring Security (in-memory + DB, RBAC, method/URL security) | Done |
+| DTOs, SQL scripts, validation, exceptions | Done |
+| i18n EN + UK | Done |
+| Logging (AOP + business + security events) | Done |
+| H2 dev / PostgreSQL prod | Done |
+| Unit tests (services + controllers) | Done |
+| Order management | Done |
+| Search, pagination, sorting | Done |
+| JWT API | Done |
+| BCrypt | Done |
 
-## Заметки
+## Notes
 
-- H2 Console (dev): http://localhost:8080/h2-console  
-  JDBC URL: `jdbc:h2:mem:appliancedb`, user: `sa`, password: пустой
-- Для production задайте свой `JWT_SECRET` и настройте PostgreSQL в `application-prod.properties`
+- **H2 Console (dev):** http://localhost:8080/h2-console  
+  JDBC URL: `jdbc:h2:mem:appliancedb`, user: `sa`, password: *(empty)*
+- Default active profile is `dev` in `application.properties`; override with `-Dspring-boot.run.profiles=prod` for production deployments.

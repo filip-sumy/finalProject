@@ -29,7 +29,7 @@ public class AuthApiController {
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        request.getUsername(),
                         request.getPassword()));
 
         UserDetails user = (UserDetails) authentication.getPrincipal();

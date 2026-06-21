@@ -4,9 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spring.finalproject.api.dto.response.ApiErrorResponse;
 import org.spring.finalproject.exception.BusinessException;
+import org.spring.finalproject.exception.EntityInUseException;
+import org.spring.finalproject.exception.EntityNotFoundException;
 import org.spring.finalproject.exception.ExceptionMessageResolver;
+import org.spring.finalproject.exception.InsufficientStockException;
+import org.spring.finalproject.exception.OrderAlreadyApprovedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +23,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
     private final ExceptionMessageResolver messageResolver;
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("API access denied: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiErrorResponse(
+                        403,
+                        messageResolver.resolve("error.forbidden")));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthentication(AuthenticationException ex) {
+        log.warn("API authentication failed: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiErrorResponse(
+                        401,
+                        messageResolver.resolve("login.error")));
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex) {
@@ -52,12 +78,16 @@ public class ApiExceptionHandler {
     }
 
     private HttpStatus resolveStatus(BusinessException ex) {
-        return switch (ex.getClass().getSimpleName()) {
-            case "EntityNotFoundException" -> HttpStatus.NOT_FOUND;
-            case "EntityInUseException" -> HttpStatus.CONFLICT;
-            case "OrderAlreadyApprovedException", "InsufficientStockException" ->
-                    HttpStatus.BAD_REQUEST;
-            default -> HttpStatus.BAD_REQUEST;
-        };
+        if (ex instanceof EntityNotFoundException) {
+            return HttpStatus.NOT_FOUND;
+        }
+        if (ex instanceof EntityInUseException) {
+            return HttpStatus.CONFLICT;
+        }
+        if (ex instanceof OrderAlreadyApprovedException
+                || ex instanceof InsufficientStockException) {
+            return HttpStatus.BAD_REQUEST;
+        }
+        return HttpStatus.BAD_REQUEST;
     }
 }

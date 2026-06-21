@@ -54,7 +54,7 @@ public class OrderApiController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CLIENT')")
+    @PreAuthorize("@orderSecurity.isOwner(#id, authentication) or hasAnyRole('ADMIN','EMPLOYEE')")
     public OrderDto findById(@PathVariable Long id) {
         return orderService.findById(id);
     }

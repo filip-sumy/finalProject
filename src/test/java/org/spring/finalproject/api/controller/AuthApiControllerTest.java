@@ -50,7 +50,7 @@ class AuthApiControllerTest extends ControllerTestBase {
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"john@test.com","password":"password"}
+                                {"username":"john@test.com","password":"password"}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("test-jwt-token"))
